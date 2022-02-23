@@ -15,10 +15,15 @@ load_dotenv(dotenv_path=env_path)
 
 app = Flask(__name__)
 
-#client = slack.WebClient(token=os.environ['SLACK_TOKEN'])
+# client = slack.WebClient(token=os.environ['SLACK_TOKEN']) => For Old version of Slack-SDK
 client = WebClient(token=os.environ['SLACK_TOKEN'])
 api = os.environ['APIKEY']
-slack_webhook = os.environ['SLACK_WEB_HOOK']
+# common webhook where the data will be posted to the bot directly and it will be visible to everyone.
+slack_webhook_url = os.environ['SLACK_WEB_HOOK']
+
+headers = {
+    'Content-type': 'application/json',
+}
 
 
 @app.route('/', methods=['GET'])
@@ -54,22 +59,33 @@ def antibot(data, text, user, response_url):
     print(user)
 
     if validators.url(text) is True:
-        # if text is not None:
 
-        client.chat_postMessage(channel='#antibot-checker',
-                                text=f'@{user} has started the AntiBot Scan on {text}', response_type='in_channel')
+        initial_scan_message = {
+            "text": 'Antibot Details',
+            "blocks": [
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f'@{user} Please use the command: /antibot http://example.com'
+                    }
+                },
+            ]
+        }
+        resp = requests.post(
+            url=slack_webhook_url, headers=headers, data=json.dumps(initial_scan_message))
+
+        print(resp.status_code)
 
         client.chat_postMessage(channel='#antibot-checker',
                                 text='Sending request to Antibotpedia', response_type='in_channel')
-        #print("Sending request to Antibotpedia")
+
         page_id = requests.get(
             f'https://antibotpedia.scrapinghub.com/api/check/add?url={text}&apikey={api}')
 
         print(page_id.text)
         dict1 = json.loads(page_id.text)
         page = dict1['response']['check_id']
-        # client.chat_postMessage(channel='#antibot-checker',
-        #                        text=f'this is the page id {page}', response_type='in_channel')
 
         client.chat_postMessage(
             channel='#antibot-checker', text="Please wait. The scan takes atleast 1-2 mins time. Even on GUI", response_type='in_channel')
@@ -96,10 +112,6 @@ def antibot(data, text, user, response_url):
         antibot_data = final_result['response']['check']['result']['found']
         app_matches = final_result['response']['check']['result']['app_matches']
 
-        headers = {
-            'Content-type': 'application/json',
-        }
-        #print(f"Antibots Found {antibot_data}")
         antibot_data = {
             "text": 'Antibot Details',
             "blocks": [
@@ -122,36 +134,56 @@ def antibot(data, text, user, response_url):
         }
 
         print(antibot_data)
-        # common webhook where the data will be posted to the bot directly and it will be visible to everyone.
-        url = f'{slack_webhook}'
+
         # url = response_url  # this is the URL which was generated from the request that we did to scan the bot, it is a unique payload. If we use this we will be posting the data to the bot but it will be visible to the person who posted it.
         response = requests.post(
-            url, headers=headers, data=json.dumps(antibot_data))
+            url=slack_webhook_url, headers=headers, data=json.dumps(antibot_data))
 
         print(response.status_code)
     else:
-        client.chat_postMessage(
-            channel='#antibot-checker', text="Please enter a proper URL", response_type='in_channel')
+
+        incorrect_url_message = {
+            "text": 'Antibot Details',
+            "blocks": [
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f'@{user} Please enter a proper URL: https://example.com or http://example.com'
+                    }
+                },
+            ]
+        }
+        resp = requests.post(
+            url=response_url, headers=headers, data=json.dumps(incorrect_url_message))
+        print(resp.status_code)
 
     return Response(), 200
 
 
 @app.route('/help', methods=['POST'])
 def slack_help():
-    #data = request.form
-    #response_url = data["response_url"]
-    message = {
-        "text": "Please use the command: /antibot http://example.com"
+    data = request.form
+    user = data.get('user_name')
+    # response_url = data["response_url"]
+    help_message = {
+        "text": 'Antibot Details',
+        "blocks": [
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f'@{user} Please use the command: /antibot http://example.com'
+                }
+            },
+        ]
     }
     resp = requests.post(
-        url=f'{slack_webhook}', json=message)
+        url=slack_webhook_url, headers=headers, data=json.dumps(help_message))
     print(resp.status_code)
 
     return Response(), 200
-    # client.chat_postMessage(channel='#antibot-checker',
-    #                        text="Please use the given command: /antibot example.com", response_type='in_channel')
 
 
-#ray.get(ray.slack_response(), ray.message_count())
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(port=5050, debug=True)
