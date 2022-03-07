@@ -8,7 +8,7 @@ import requests
 from time import sleep
 import threading
 import validators
-
+import time
 
 env_path = Path('.')/'.env'
 load_dotenv(dotenv_path=env_path)
@@ -20,7 +20,10 @@ client = WebClient(token=os.environ['SLACK_TOKEN'])
 api = os.environ['APIKEY']
 # common webhook where the data will be posted to the bot directly and it will be visible to everyone.
 slack_webhook_url = os.environ['SLACK_WEB_HOOK']
+zyte_api = os.environ['ZYTE_DATA_API']
+zyte_api_url = os.environ['ZYTE_DATA_API_URL']
 spm_api = os.environ['SPM_API']
+channel_id = os.environ['CHANNEL_ID']
 headers = {
     'Content-type': 'application/json',
 }
@@ -320,6 +323,122 @@ def crawlbot(data, text, user, response_url):
         resp = requests.post(
             url=response_url, headers=headers, data=json.dumps(incorrect_url_warning))
         print(resp.status_code)
+    return Response(), 200
+
+
+@app.route('/zytedataapi', methods=['POST'])
+# the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
+def slack_zyteapi_response():
+    data = request.form
+    text = data.get('text')
+    validators.url(text)
+    user = data.get('user_name')
+    response_url = data["response_url"]
+    message = {
+        "text": "Connection successful!"
+    }
+    resp = requests.post(response_url, json=message)
+    print(resp.status_code)
+    zyte_api = threading.Thread(
+        target=zytedataapi,
+        args=(data, text, user, response_url)
+    )
+    zyte_api.start()
+    return 'Processing, Please wait!!'
+
+
+def zytedataapi(data, text, user, response_url):
+    print(data)
+    print(user)
+
+    if validators.url(text) is True:
+        starting_region_check = {
+            "text": f"@{user} It may take upto 5 mins to complete, Go for a break or listen to a song :sweat_smile: "
+        }
+        requests.post(url=slack_webhook_url, json=starting_region_check)
+        API_URL = f"{zyte_api_url}"
+        API_KEY = f"{zyte_api}"
+        response = requests.post(API_URL, auth=(API_KEY, ''), json={
+            "url": f"{text}",
+            "browserHtml": True,
+            "javascript": True
+        })
+        zyte_api_result = response.json()
+        if 'browserHtml' in zyte_api_result:
+
+            print(zyte_api_result['browserHtml'])
+            f = open(f'{user}.html', 'w')
+            f.write(zyte_api_result['browserHtml'])
+            f.close()
+            zyte_data_api_result = {
+                "text": 'Antibot Details',
+                "blocks": [
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": f'@{user} Zyte Data API results for {text}:'
+                        }
+                    },
+                    # {
+                    #     "type": "section",
+                    #     "block_id": "section567",
+                    #     "text": {
+                    #         "type": "mrkdwn",
+                    #         "text": f"The Result is given below: \n\n {final_result}"
+                    #     },
+                    # },
+                ]
+            }
+            zyte_resp = requests.post(
+                url=slack_webhook_url, headers=headers, data=json.dumps(zyte_data_api_result))
+            file_upload = client.files_upload(
+                channels=f'{channel_id}', filetype='html', file=f'{user}.html', title=f'{text}', user=f'{user}')
+            print(file_upload.status_code)
+            print(zyte_resp.status_code)
+            time.sleep(2)
+            os.remove(f'{user}.html')
+        else:
+            zyte_data_api_result = {
+                "text": 'Antibot Details',
+                "blocks": [
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": f'@{user} Zyte Data API results for {text}:'
+                        }
+                    },
+                    {
+                        "type": "section",
+                        "block_id": "section567",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": f"Seems like a Ban! \n\n Reach out to #uncork team. \n\n The Result is given below: \n\n {zyte_api_result}"
+                        },
+                    },
+                ]
+            }
+            zyte_resp = requests.post(
+                url=slack_webhook_url, headers=headers, data=json.dumps(zyte_data_api_result))
+
+    else:
+        incorrect_url_warning = {
+            "text": 'Antibot Details',
+            "blocks": [
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f'@{user} Please enter the proper URL like this http://{text} or https://{text} '
+                    }
+                },
+            ]
+        }
+        zyte_resp = requests.post(
+            url=response_url, headers=headers, data=json.dumps(incorrect_url_warning))
+        print(zyte_resp.status_code)
+
     return Response(), 200
 
 
