@@ -9,6 +9,7 @@ from time import sleep
 import threading
 import validators
 import time
+import pandas as pd
 
 env_path = Path('.')/'.env'
 load_dotenv(dotenv_path=env_path)
@@ -24,6 +25,8 @@ zyte_api = os.environ['ZYTE_DATA_API']
 zyte_api_url = os.environ['ZYTE_DATA_API_URL']
 spm_api = os.environ['SPM_API']
 channel_id = os.environ['CHANNEL_ID']
+netloc_spm_api = os.environ['NETLOCK_SPM_API']
+
 headers = {
     'Content-type': 'application/json',
 }
@@ -438,6 +441,91 @@ def zytedataapi(data, text, user, response_url):
         zyte_resp = requests.post(
             url=response_url, headers=headers, data=json.dumps(incorrect_url_warning))
         print(zyte_resp.status_code)
+
+    return Response(), 200
+
+
+@app.route('/netlock-dc', methods=['POST'])
+# the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
+def slack_netlock_dc_response():
+    data = request.form
+    text = data.get('text')
+    validators.url(text)
+    user = data.get('user_name')
+    response_url = data["response_url"]
+    message = {
+        "text": "Connection successful!"
+    }
+    resp = requests.post(response_url, json=message)
+    print(resp.status_code)
+    netlocksmith_dc = threading.Thread(
+        target=netlock_dc,
+        args=(data, text, user, response_url)
+    )
+    netlocksmith_dc.start()
+    return 'Processing, Please wait!!'
+
+
+def netlock_dc(data, text, user, response_url):
+    if validators.url(text) is True:
+        print(data)
+        print(user)
+        url = f'{text}'
+        post_data = json.dumps({
+            'text': url,
+            # 'residential': residential,
+            'apikey': f'{netloc_spm_api}'
+        })
+
+        # headers = {
+        #     "Content-Type": "application/json"
+        # }
+
+        netlocsmith_results = requests.post(
+            f'http://34.135.231.242:80/netlocsmith', data=post_data, headers=headers)
+        df = pd.DataFrame(eval(json.loads(netlocsmith_results.text)))
+
+        print(df)
+
+        netlock_dc_results = {
+            "text": 'Antibot Details',
+            "blocks": [
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f'@{user} Zyte Data API results for {text}:'
+                    }
+                },
+                {
+                    "type": "section",
+                    "block_id": "section567",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"Netlock-Smith Results given below: \n\n {df}"
+                    },
+                },
+            ]
+        }
+        netlock_dc_resp = requests.post(
+            url=response_url, headers=headers, data=json.dumps(netlock_dc_results))
+        print(netlock_dc_resp.status_code)
+    else:
+        incorrect_url_warning = {
+            "text": 'Antibot Details',
+            "blocks": [
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f'@{user} Please enter the proper URL like this http://{text} or https://{text} '
+                    }
+                },
+            ]
+        }
+        netlock_dc_resp = requests.post(
+            url=response_url, headers=headers, data=json.dumps(incorrect_url_warning))
+        print(netlock_dc_resp.status_code)
 
     return Response(), 200
 
