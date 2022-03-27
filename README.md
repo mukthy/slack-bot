@@ -1,6 +1,6 @@
 # slack-bot
 
-It is a SlackAPP which integrates between Slack and Internal AntibotPedia API.
+It is a SlackAPP which integrates between Slack and Internal AntibotPedia API, NetlocSmith, and other products (ZyteDataAPI, AutomaticExtraction).
 
 It is Flask based web-app.
 
