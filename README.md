@@ -6,7 +6,7 @@ It is Flask based web-app.
 
 If you have slack channel access then usage is:
 
-`Usage is given below:`
+Usage is given below:
 
 `/antibot https://example.com.`
 
