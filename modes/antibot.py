@@ -26,9 +26,7 @@ def initial_message(user, slack_webhook_url, headers):
     }
 
     resp = requests.post(
-        url=slack_webhook_url,
-        headers=headers,
-        data=json.dumps(initial_scan_message),
+        url=slack_webhook_url, headers=headers, data=json.dumps(initial_scan_message),
     )
     return resp
 
@@ -87,7 +85,6 @@ def post_antibot_results(slack_webhook_url, headers, user, url, final_result):
 
     # url = response_url  # this is the URL which was generated from the request that we did to scan the bot, it is a unique payload. If we use this we will be posting the data to the bot but it will be visible to the person who posted it.
     response = requests.post(
-        url=slack_webhook_url, headers=headers, data=json.dumps(
-            antibot_data)
+        url=slack_webhook_url, headers=headers, data=json.dumps(antibot_data)
     )
     return response

@@ -8,10 +8,10 @@ from slack_sdk import WebClient
 
 env_path = Path(".", ".") / ".env"
 load_dotenv(dotenv_path=env_path)
-auto_x_api = os.environ['AUTO_X_API']
-auto_x_url = os.environ['AUTO_X_URL']
+auto_x_api = os.environ["AUTO_X_API"]
+auto_x_url = os.environ["AUTO_X_URL"]
 client = WebClient(token=os.environ["SLACK_TOKEN"])
-channel_id = os.environ['CHANNEL_ID']
+channel_id = os.environ["CHANNEL_ID"]
 
 
 def initial_message(response_url, headers, user):
@@ -19,8 +19,7 @@ def initial_message(response_url, headers, user):
         "text": f"@{user}, Please wait Auto-Extraction is Running \n"
     }
     auto_x_product_response = requests.post(
-        url=response_url, headers=headers, data=json.dumps(
-            auto_x_product_start)
+        url=response_url, headers=headers, data=json.dumps(auto_x_product_start)
     )
     print(auto_x_product_response.status_code)
     return auto_x_product_response
@@ -78,9 +77,7 @@ def product(url, response_url, headers, user, slack_webhook_url):
             ]
         }
         auto_x_product_response = requests.post(
-            url=slack_webhook_url,
-            headers=headers,
-            data=json.dumps(auto_x_product_msg),
+            url=slack_webhook_url, headers=headers, data=json.dumps(auto_x_product_msg),
         )
         print(auto_x_product_response.status_code)
 

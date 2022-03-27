@@ -17,7 +17,6 @@ def check_url(user, response_url, headers):
         ],
     }
     resp = requests.post(
-        url=response_url, headers=headers, data=json.dumps(
-            incorrect_url_message)
+        url=response_url, headers=headers, data=json.dumps(incorrect_url_message)
     )
     return resp

@@ -7,8 +7,8 @@ import pandas as pd
 
 env_path = Path(".", ".") / ".env"
 load_dotenv(dotenv_path=env_path)
-netloc_api = os.environ['NETLOC_API']
-netloc_url = os.environ['NETLOC_URL']
+netloc_api = os.environ["NETLOC_API"]
+netloc_url = os.environ["NETLOC_URL"]
 
 
 def netloc(url, user, response_url, headers):
@@ -48,8 +48,7 @@ def netloc(url, user, response_url, headers):
         ],
     }
     netlock_dc_resp = requests.post(
-        url=response_url, headers=headers, data=json.dumps(
-            netlock_dc_results)
+        url=response_url, headers=headers, data=json.dumps(netlock_dc_results)
     )
     print(netlock_dc_resp.status_code)
     return netlock_dc_resp

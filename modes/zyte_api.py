@@ -13,18 +13,17 @@ def initial_message(response_url, user):
     initial_msg = {
         "text": f"@{user} It may take upto 5 mins to complete, Go for a break or listen to a song :sweat_smile: "
     }
-    initial_response = requests.post(
-        url=response_url, json=initial_msg)
+    initial_response = requests.post(url=response_url, json=initial_msg)
     return initial_response
 
 
 env_path = Path(".", ".") / ".env"
 print(env_path)
 load_dotenv(dotenv_path=env_path)
-zyte_api = os.environ['ZYTE_DATA_API']
-zyte_api_url = os.environ['ZYTE_DATA_API_URL']
+zyte_api = os.environ["ZYTE_DATA_API"]
+zyte_api_url = os.environ["ZYTE_DATA_API_URL"]
 client = WebClient(token=os.environ["SLACK_TOKEN"])
-channel_id = os.environ['CHANNEL_ID']
+channel_id = os.environ["CHANNEL_ID"]
 
 
 def zyte_api_req(url, user, slack_webhook_url, headers):
@@ -67,7 +66,7 @@ def zyte_api_req(url, user, slack_webhook_url, headers):
             data=json.dumps(zyte_data_api_result),
         )
         file_upload = client.files_upload(
-            channels=f'{channel_id}',
+            channels=f"{channel_id}",
             filetype="html",
             file=f"{user}.html",
             title=f"{url}",

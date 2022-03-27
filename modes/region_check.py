@@ -11,8 +11,7 @@ def initial_message(response_url, user):
     starting_region_check = {
         "text": f"@{user} It may take upto 5 mins to complete, Go for a break or listen to a song :sweat_smile: "
     }
-    initial_response = requests.post(
-        url=response_url, json=starting_region_check)
+    initial_response = requests.post(url=response_url, json=starting_region_check)
     return initial_response
 
 
@@ -42,8 +41,6 @@ def post_result_to_slack(response_url, headers, url, user, ok_result, error_resu
         ],
     }
     post_result_to_slack = requests.post(
-        url=response_url,
-        headers=headers,
-        data=json.dumps(region_check_results),
+        url=response_url, headers=headers, data=json.dumps(region_check_results),
     )
     return post_result_to_slack

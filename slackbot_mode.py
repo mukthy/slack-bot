@@ -1,5 +1,12 @@
 from modes import req
-from modes import antibot, region_check, zyte_api, netlocksmith, auto_xtract_product, auto_xtract_article
+from modes import (
+    antibot,
+    region_check,
+    zyte_api,
+    netlocksmith,
+    auto_xtract_product,
+    auto_xtract_article,
+)
 from invalid_url import check_url
 from slack_sdk import WebClient
 import os
@@ -31,7 +38,7 @@ auto_x_api = os.environ["AUTO_X_API"]
 headers = {
     "Content-type": "application/json",
 }
-#SLACK_BOT_TOKEN = os.environ["SLACK_BOT_TOKEN"]
+# SLACK_BOT_TOKEN = os.environ["SLACK_BOT_TOKEN"]
 
 
 # slack_client = SlackClient(SLACK_BOT_TOKEN)
@@ -52,8 +59,7 @@ def slack_response():
     message = {"text": "Connection successful!"}
     resp = requests.post(response_url, json=message)
     print(resp.status_code)
-    x = threading.Thread(target=check_antibot, args=(
-        data, text, user, response_url))
+    x = threading.Thread(target=check_antibot, args=(data, text, user, response_url))
     x.start()
     return "Processing, Please wait!!"
 
@@ -66,8 +72,7 @@ def check_antibot(data, text, user, response_url):
     url = f"{text}"
     if validators.url(url) is True:
 
-        initial_message = antibot.initial_message(
-            user, slack_webhook_url, headers)
+        initial_message = antibot.initial_message(user, slack_webhook_url, headers)
         print(initial_message.status_code)
 
         client.chat_postMessage(
@@ -76,7 +81,7 @@ def check_antibot(data, text, user, response_url):
             response_type="in_channel",
         )
 
-# the below is using get_page_id function from a custom module antibot under modes package.
+        # the below is using get_page_id function from a custom module antibot under modes package.
         page_id = antibot.get_page_id(url, api)
         print(page_id)
 
@@ -95,19 +100,19 @@ def check_antibot(data, text, user, response_url):
             response_type="in_channel",
         )
 
-# the below is using final_result function from a custom module antibot under modes package.
+        # the below is using final_result function from a custom module antibot under modes package.
         final_result = antibot.final_result(page, api)
         print(final_result)
 
-# the below is using final_result function from a custom module antibot under modes package.
+        # the below is using final_result function from a custom module antibot under modes package.
         final_antibot_result = antibot.post_antibot_results(
-            slack_webhook_url, headers, user, url, final_result)
+            slack_webhook_url, headers, user, url, final_result
+        )
         print(final_antibot_result.status_code)
     else:
 
         # the below is using check_url function from a custom module invalid_url.
-        incorrect_url_message = check_url(
-            user, response_url, headers)
+        incorrect_url_message = check_url(user, response_url, headers)
         print(incorrect_url_message)
 
     return Response(), 200
@@ -152,8 +157,7 @@ def slack_crawlbot_response():
     message = {"text": "Connection successful!"}
     resp = requests.post(response_url, json=message)
     print(resp.status_code)
-    crawl_bot = threading.Thread(
-        target=crawlbot, args=(data, text, user, response_url))
+    crawl_bot = threading.Thread(target=crawlbot, args=(data, text, user, response_url))
     crawl_bot.start()
     return "Processing, Please wait!!"
 
@@ -161,7 +165,7 @@ def slack_crawlbot_response():
 def crawlbot(data, text, user, response_url):
     print(data)
     print(user)
-    url = f'{text}'
+    url = f"{text}"
     if validators.url(text) is True:
         regions = [
             "AU",
@@ -222,7 +226,7 @@ def crawlbot(data, text, user, response_url):
         error_result = []
         threads = []
 
-# posting the results to slack using a initial_message function from a region_check modulde in mode package.
+        # posting the results to slack using a initial_message function from a region_check modulde in mode package.
         initial_message = region_check.initial_message(response_url, user)
         print(initial_message)
 
@@ -257,8 +261,7 @@ def crawlbot(data, text, user, response_url):
 
             for region in regions:
                 headers = {"X-Crawlera-Region": f"{region}"}
-                thread = threading.Thread(
-                    target=send, args=[text, headers, region])
+                thread = threading.Thread(target=send, args=[text, headers, region])
                 thread.start()
                 threads.append(thread)
 
@@ -272,12 +275,13 @@ def crawlbot(data, text, user, response_url):
         print(ok_result)
         print(error_result)
 
-# posting the results to slack using a post_result_to_slack function from a region_check modulde in mode package.
+        # posting the results to slack using a post_result_to_slack function from a region_check modulde in mode package.
         post_result_to_slack = region_check.post_result_to_slack(
-            response_url, headers, url, user, ok_result, error_result)
+            response_url, headers, url, user, ok_result, error_result
+        )
         print(post_result_to_slack)
 
-# Using a function check_url from zyte_api module of mode package
+    # Using a function check_url from zyte_api module of mode package
     else:
         incorrect_url_message = check_url(user, response_url, headers)
         print(incorrect_url_message)
@@ -305,7 +309,7 @@ def slack_zyteapi_response():
 def zytedataapi(data, text, user, response_url):
     print(data)
     print(user)
-    url = f'{text}'
+    url = f"{text}"
 
     if validators.url(text) is True:
 
@@ -314,9 +318,8 @@ def zytedataapi(data, text, user, response_url):
         initial_msg = zyte_api.initial_message(response_url, user)
         print(initial_msg)
 
-# Using a function zyte_api_req from zyte_api module of mode package
-        zyte_resp = zyte_api.zyte_api_req(
-            url, user, slack_webhook_url, headers)
+        # Using a function zyte_api_req from zyte_api module of mode package
+        zyte_resp = zyte_api.zyte_api_req(url, user, slack_webhook_url, headers)
         print(zyte_resp)
 
     else:
@@ -351,7 +354,7 @@ def netlock_dc(data, text, user, response_url):
         print(data)
         print(user)
         url = f"{text}"
-# For netlocsmith, it is using a netloc function from netlocksmith module from mode package.
+        # For netlocsmith, it is using a netloc function from netlocksmith module from mode package.
 
         netlock_dc_resp = netlocksmith.netloc(url, user, response_url, headers)
         print(netlock_dc_resp)
@@ -360,6 +363,7 @@ def netlock_dc(data, text, user, response_url):
         print(incorrect_url_warning.status_code)
 
     return Response(), 200
+
 
 # Single Product Only
 
@@ -388,14 +392,14 @@ def auto_x_product(data, text, user, response_url):
         print(user)
         url = f"{text}"
 
-# it is using a initial_message function from auto_xtract_product module from mode package.
-        initial_msg = auto_xtract_product.initial_message(
-            response_url, headers, user)
+        # it is using a initial_message function from auto_xtract_product module from mode package.
+        initial_msg = auto_xtract_product.initial_message(response_url, headers, user)
         print(initial_msg)
 
-# For product-extraction, it is using a product function from auto_xtract_product module from mode package.
+        # For product-extraction, it is using a product function from auto_xtract_product module from mode package.
         auto_x_product_results = auto_xtract_product.product(
-            url, response_url, headers, user, slack_webhook_url)
+            url, response_url, headers, user, slack_webhook_url
+        )
         print(auto_x_product_results)
     else:
 
@@ -404,6 +408,7 @@ def auto_x_product(data, text, user, response_url):
         print(incorrect_url_warning.status_code)
 
     return Response(), 200
+
 
 # Product Listing
 
@@ -432,14 +437,14 @@ def auto_x_product_lisitng(data, text, user, response_url):
         print(user)
         url = f"{text}"
 
-# it is using a initial_message function from auto_xtract_product module from mode package.
-        initial_msg = auto_xtract_product.initial_message(
-            response_url, headers, user)
+        # it is using a initial_message function from auto_xtract_product module from mode package.
+        initial_msg = auto_xtract_product.initial_message(response_url, headers, user)
         print(initial_msg)
 
-# For product-extraction, it is using a product function from auto_xtract_product module from mode package.
+        # For product-extraction, it is using a product function from auto_xtract_product module from mode package.
         auto_x_product_list_response = auto_xtract_product.product_list(
-            url, response_url, headers, user, slack_webhook_url)
+            url, response_url, headers, user, slack_webhook_url
+        )
         print(auto_x_product_list_response)
     else:
 
@@ -451,6 +456,7 @@ def auto_x_product_lisitng(data, text, user, response_url):
 
 
 # Article Only
+
 
 @app.route("/auto-x-article", methods=["POST"])
 # the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
@@ -476,14 +482,14 @@ def auto_x_article(data, text, user, response_url):
         print(user)
         url = f"{text}"
 
-# For article-extraction, it is using a initial_message function from auto_xtract_article module from mode package.
-        initial_msg = auto_xtract_article.initial_message(
-            response_url, headers, user)
+        # For article-extraction, it is using a initial_message function from auto_xtract_article module from mode package.
+        initial_msg = auto_xtract_article.initial_message(response_url, headers, user)
         print(initial_msg)
 
-# For article-extraction, it is using a article function from auto_xtract_article module from mode package.
+        # For article-extraction, it is using a article function from auto_xtract_article module from mode package.
         auto_x_article_response = auto_xtract_article.article(
-            url, response_url, headers, user, slack_webhook_url)
+            url, response_url, headers, user, slack_webhook_url
+        )
         print(auto_x_article_response)
     else:
         # this is using a function check_url from a module name invalid_url
@@ -491,6 +497,7 @@ def auto_x_article(data, text, user, response_url):
         print(incorrect_url_warning.status_code)
 
     return Response(), 200
+
 
 # article_list only
 
@@ -519,14 +526,14 @@ def auto_x_article_lisitng(data, text, user, response_url):
         print(user)
         url = f"{text}"
 
-# For article-extraction, it is using a initial_message function from auto_xtract_article module from mode package.
-        initial_msg = auto_xtract_article.initial_message(
-            response_url, headers, user)
+        # For article-extraction, it is using a initial_message function from auto_xtract_article module from mode package.
+        initial_msg = auto_xtract_article.initial_message(response_url, headers, user)
         print(initial_msg)
 
-# For article-extraction, it is using a article function from auto_xtract_article module from mode package.
+        # For article-extraction, it is using a article function from auto_xtract_article module from mode package.
         auto_x_article_response = auto_xtract_article.article_list(
-            url, response_url, headers, user, slack_webhook_url)
+            url, response_url, headers, user, slack_webhook_url
+        )
         print(auto_x_article_response)
 
     else:
