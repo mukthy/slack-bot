@@ -24,4 +24,4 @@ Usage is given below:
 
 `/auto-x-article-list https://example.com` <= article-list-extraction
 
-`/dataset-project-log` <= To get the Auto-Extraction Dataset Project Link.
+`/dataset-project-log org_id dataset_id` <= To get the Auto-Extraction Dataset Project Link.
