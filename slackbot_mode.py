@@ -1,4 +1,3 @@
-from modes import req
 from modes import (
     antibot,
     region_check,
@@ -6,10 +5,12 @@ from modes import (
     netlocksmith,
     auto_xtract_product,
     auto_xtract_article,
+    dataset_project_id,
 )
 from invalid_url import check_url
 from slack_sdk import WebClient
 import os
+import re
 from pathlib import Path
 from dotenv import load_dotenv
 from flask import Flask, request, Response, render_template
@@ -543,6 +544,70 @@ def auto_x_article_lisitng(data, text, user, response_url):
 
     return Response(), 200
 
+
+@app.route("/dataset-project-log", methods=["POST"])
+# the below function is to send a response as 200 to slack's post request within 3 sec to avoid the
+# "operation_timed_out" error.
+
+def slack_dataset_project_response():
+    data = request.form
+    text = data.get("text")
+    validators.url(text)
+    user = data.get("user_name")
+    response_url = data["response_url"]
+    message = {"text": "Connection successful!"}
+    resp = requests.post(response_url, json=message)
+    print(resp.status_code)
+    dataset_project_id = threading.Thread(
+        target=dataset_project, args=(data, text, user, response_url)
+    )
+    dataset_project_id.start()
+    return "Processing, Please wait!!"
+
+
+def dataset_project(data, text, user, response_url):
+    print(data)
+    print(user)
+    # url = f"{text}"
+    print(text)
+    org_dataset_string = (line.split(' ') for line in text.splitlines())
+    # print(org_dataset_string)
+    regex = re.compile(r"(^[0-9]{1,})")
+    for org, dataset in org_dataset_string:
+        check_org = regex.search(org)
+        if check_org is None:
+            #print('Enter the ORG ID first and then Dataset\n For Eg: /dataset-project ORG_ID DATASET_ID')
+
+            incorrect_org_msg = {
+                "blocks": [
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": f"@{user} Enter the ORG ID first and then Dataset\n For Eg: /dataset-project-log ORG_ID DATASET_ID\n",
+                        },
+                    }
+                ]
+            }
+            incorrect_org_response = requests.post(
+                url=response_url,
+                headers=headers,
+                data=json.dumps(incorrect_org_msg),
+            )
+            print(incorrect_org_response.status_code)
+
+        else:
+            print(org)
+            print(dataset)
+
+            # It is using a initial_message function from dataset_project_id module from mode package.
+            initial_msg = dataset_project_id.initial_message(response_url, headers, user, dataset)
+            print(initial_msg)
+            # It is using a get_dataset_project_id function from the dataset_project_id module from the package mode.
+            sc_dataset_project = dataset_project_id.get_dataset_project_id(org, dataset, user, response_url, headers)
+            print(sc_dataset_project)
+
+    return Response(), 200
 
 if __name__ == "__main__":
     app.run(port=5050, debug=True)
