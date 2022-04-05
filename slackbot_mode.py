@@ -549,6 +549,7 @@ def auto_x_article_lisitng(data, text, user, response_url):
 # the below function is to send a response as 200 to slack's post request within 3 sec to avoid the
 # "operation_timed_out" error.
 
+
 def slack_dataset_project_response():
     data = request.form
     text = data.get("text")
@@ -570,13 +571,13 @@ def dataset_project(data, text, user, response_url):
     print(user)
     # url = f"{text}"
     print(text)
-    org_dataset_string = (line.split(' ') for line in text.splitlines())
+    org_dataset_string = (line.split(" ") for line in text.splitlines())
     # print(org_dataset_string)
     regex = re.compile(r"(^[0-9]{1,})")
     for org, dataset in org_dataset_string:
         check_org = regex.search(org)
         if check_org is None:
-            #print('Enter the ORG ID first and then Dataset\n For Eg: /dataset-project ORG_ID DATASET_ID')
+            # print('Enter the ORG ID first and then Dataset\n For Eg: /dataset-project ORG_ID DATASET_ID')
 
             incorrect_org_msg = {
                 "blocks": [
@@ -590,9 +591,7 @@ def dataset_project(data, text, user, response_url):
                 ]
             }
             incorrect_org_response = requests.post(
-                url=response_url,
-                headers=headers,
-                data=json.dumps(incorrect_org_msg),
+                url=response_url, headers=headers, data=json.dumps(incorrect_org_msg),
             )
             print(incorrect_org_response.status_code)
 
@@ -601,13 +600,18 @@ def dataset_project(data, text, user, response_url):
             print(dataset)
 
             # It is using a initial_message function from dataset_project_id module from mode package.
-            initial_msg = dataset_project_id.initial_message(response_url, headers, user, dataset)
+            initial_msg = dataset_project_id.initial_message(
+                response_url, headers, user, dataset
+            )
             print(initial_msg)
             # It is using a get_dataset_project_id function from the dataset_project_id module from the package mode.
-            sc_dataset_project = dataset_project_id.get_dataset_project_id(org, dataset, user, response_url, headers)
+            sc_dataset_project = dataset_project_id.get_dataset_project_id(
+                org, dataset, user, response_url, headers
+            )
             print(sc_dataset_project)
 
     return Response(), 200
+
 
 if __name__ == "__main__":
     app.run(port=5050, debug=True)
