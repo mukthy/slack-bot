@@ -8,13 +8,13 @@ If you have slack channel access then usage is:
 
 Usage is given below:
 
-`/antibot https://example.com.`
+`/antibot https://example.com.` <= check for Antibot using Antibotpedia API
 
-`/regioncheck https://example.com.`
+`/regioncheck https://example.com.` <= checks for GeoLocked  
 
-`/zytedataapi https://example.com`
+`/zytedataapi https://example.com` <= ZyteDataAPI
 
-`/netlock-dc https://example.com`
+`/netlock-dc https://example.com` <= Netlocsmith with Slack
 
 `/auto-x-product https://example.com` <= product-extraction
 
