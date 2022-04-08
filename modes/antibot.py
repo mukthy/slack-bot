@@ -4,8 +4,18 @@ from time import sleep
 
 
 def get_page_id(url, api):
+    headers = {
+        "accept": "application/json",
+        "apikey": f"{api}",
+    }
+    params = {
+        "url": f"{url}",
+        "apikey": f"{api}",
+    }
     page_id = requests.get(
-        f"https://antibotpedia.scrapinghub.com/api/check/add?url={url}&apikey={api}"
+        "https://antibotpedia.scrapinghub.com/api/check/add",
+        headers=headers,
+        params=params,
     )
     return page_id
 
