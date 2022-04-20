@@ -637,12 +637,12 @@ def fetchapi(data, text, user, response_url):
 
     if validators.url(text) is True:
 
-        # Using a function initial_message from zyte_api module of mode package
+        # Using a function initial_message from fetch_api_screenshot module of mode package
 
         initial_msg = fetch_api_screenshot.initial_message(response_url, user)
         print(initial_msg)
 
-        # Using a function zyte_api_req from zyte_api module of mode package
+        # Using a function fetch_api_req from fetch_api_screenshot module of mode package
         fetch_resp = fetch_api_screenshot.fetch_api_req(
             url, user, slack_webhook_url, headers
         )
@@ -650,7 +650,7 @@ def fetchapi(data, text, user, response_url):
 
     else:
 
-        # Using a function check_url from zyte_api module of mode package
+        # Using a function check_url from fetch_api_screenshot module of mode package
         incorrect_url_warning = check_url(user, response_url, headers)
         print(incorrect_url_warning.status_code)
 

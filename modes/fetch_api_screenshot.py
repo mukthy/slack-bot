@@ -23,6 +23,7 @@ load_dotenv(dotenv_path=env_path)
 fetch_api = os.environ["FETCH_API"]
 fetch_api_url = os.environ["FETCH_API_URL"]
 client = WebClient(token=os.environ["SLACK_TOKEN"])
+channel_id = os.environ["CHANNEL_ID"]
 
 
 def fetch_api_req(url, user, slack_webhook_url, headers):
@@ -71,7 +72,7 @@ def fetch_api_req(url, user, slack_webhook_url, headers):
             url=slack_webhook_url, headers=headers, data=json.dumps(fetch_api_result),
         )
         file_upload = client.files_upload(
-            channels="C02NY5ME01L",
+            channels=f"{channel_id}",
             filetype="png",
             file=f"{user}.png",
             title=f"{url}",
@@ -139,7 +140,7 @@ def fetch_api_req(url, user, slack_webhook_url, headers):
                 data=json.dumps(fetch_api_result),
             )
             file_upload = client.files_upload(
-                channels="C02NY5ME01L",
+                channels=f"{channel_id}",
                 filetype="png",
                 file=f"{user}.png",
                 title=f"{url}",
@@ -206,7 +207,7 @@ def fetch_api_req(url, user, slack_webhook_url, headers):
                     data=json.dumps(fetch_api_result),
                 )
                 file_upload = client.files_upload(
-                    channels="C02NY5ME01L",
+                    channels=f"{channel_id}",
                     filetype="png",
                     file=f"{user}.png",
                     title=f"{url}",
