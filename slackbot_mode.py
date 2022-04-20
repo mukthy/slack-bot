@@ -613,6 +613,7 @@ def dataset_project(data, text, user, response_url):
 
     return Response(), 200
 
+
 @app.route("/fetchapiscreenshot", methods=["POST"])
 # the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
 def slack_fetchapi_response():
@@ -624,9 +625,7 @@ def slack_fetchapi_response():
     message = {"text": "Connection successful!"}
     resp = requests.post(response_url, json=message)
     print(resp.status_code)
-    fetch_api = threading.Thread(
-        target=fetchapi, args=(data, text, user, response_url)
-    )
+    fetch_api = threading.Thread(target=fetchapi, args=(data, text, user, response_url))
     fetch_api.start()
     return "Processing, Please wait!!"
 
@@ -634,7 +633,7 @@ def slack_fetchapi_response():
 def fetchapi(data, text, user, response_url):
     print(data)
     print(user)
-    url = f'{text}'
+    url = f"{text}"
 
     if validators.url(text) is True:
 
@@ -645,7 +644,8 @@ def fetchapi(data, text, user, response_url):
 
         # Using a function zyte_api_req from zyte_api module of mode package
         fetch_resp = fetch_api_screenshot.fetch_api_req(
-            url, user, slack_webhook_url, headers)
+            url, user, slack_webhook_url, headers
+        )
         print(fetch_resp)
 
     else:

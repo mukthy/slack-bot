@@ -13,16 +13,15 @@ def initial_message(response_url, user):
     initial_msg = {
         "text": f"@{user} It may take upto 5 mins to complete, Go for a break or listen to a song :sweat_smile: "
     }
-    initial_response = requests.post(
-        url=response_url, json=initial_msg)
+    initial_response = requests.post(url=response_url, json=initial_msg)
     return initial_response
 
 
 env_path = Path(".", ".") / ".env"
 print(env_path)
 load_dotenv(dotenv_path=env_path)
-fetch_api = os.environ['FETCH_API']
-fetch_api_url = os.environ['FETCH_API_URL']
+fetch_api = os.environ["FETCH_API"]
+fetch_api_url = os.environ["FETCH_API_URL"]
 client = WebClient(token=os.environ["SLACK_TOKEN"])
 
 
@@ -69,9 +68,7 @@ def fetch_api_req(url, user, slack_webhook_url, headers):
             ],
         }
         zyte_resp = requests.post(
-            url=slack_webhook_url,
-            headers=headers,
-            data=json.dumps(fetch_api_result),
+            url=slack_webhook_url, headers=headers, data=json.dumps(fetch_api_result),
         )
         file_upload = client.files_upload(
             channels="C02NY5ME01L",
@@ -84,7 +81,7 @@ def fetch_api_req(url, user, slack_webhook_url, headers):
         print(zyte_resp.status_code)
         time.sleep(3)
         os.remove(f"{user}.png")
-        print(f'{user}.png has been removed!')
+        print(f"{user}.png has been removed!")
         return zyte_resp
 
     elif "screenshot" not in fetch_api_result:
@@ -152,7 +149,7 @@ def fetch_api_req(url, user, slack_webhook_url, headers):
             print(zyte_resp.status_code)
             time.sleep(3)
             os.remove(f"{user}.png")
-            print(f'{user}.png has been removed!')
+            print(f"{user}.png has been removed!")
             return zyte_resp
 
         else:
@@ -219,7 +216,7 @@ def fetch_api_req(url, user, slack_webhook_url, headers):
                 print(zyte_resp.status_code)
                 time.sleep(3)
                 os.remove(f"{user}.png")
-                print(f'{user}.png has been removed!')
+                print(f"{user}.png has been removed!")
                 return zyte_resp
 
     else:
@@ -244,8 +241,6 @@ def fetch_api_req(url, user, slack_webhook_url, headers):
             ],
         }
         fetch_resp = requests.post(
-            url=slack_webhook_url,
-            headers=headers,
-            data=json.dumps(fetch_api_result),
+            url=slack_webhook_url, headers=headers, data=json.dumps(fetch_api_result),
         )
         return fetch_resp
