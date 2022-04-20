@@ -6,6 +6,7 @@ from modes import (
     auto_xtract_product,
     auto_xtract_article,
     dataset_project_id,
+    fetch_api_screenshot,
 )
 from invalid_url import check_url
 from slack_sdk import WebClient
@@ -609,6 +610,49 @@ def dataset_project(data, text, user, response_url):
                 org, dataset, user, response_url, headers
             )
             print(sc_dataset_project)
+
+    return Response(), 200
+
+@app.route("/fetchapiscreenshot", methods=["POST"])
+# the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
+def slack_fetchapi_response():
+    data = request.form
+    text = data.get("text")
+    validators.url(text)
+    user = data.get("user_name")
+    response_url = data["response_url"]
+    message = {"text": "Connection successful!"}
+    resp = requests.post(response_url, json=message)
+    print(resp.status_code)
+    fetch_api = threading.Thread(
+        target=fetchapi, args=(data, text, user, response_url)
+    )
+    fetch_api.start()
+    return "Processing, Please wait!!"
+
+
+def fetchapi(data, text, user, response_url):
+    print(data)
+    print(user)
+    url = f'{text}'
+
+    if validators.url(text) is True:
+
+        # Using a function initial_message from zyte_api module of mode package
+
+        initial_msg = fetch_api_screenshot.initial_message(response_url, user)
+        print(initial_msg)
+
+        # Using a function zyte_api_req from zyte_api module of mode package
+        fetch_resp = fetch_api_screenshot.fetch_api_req(
+            url, user, slack_webhook_url, headers)
+        print(fetch_resp)
+
+    else:
+
+        # Using a function check_url from zyte_api module of mode package
+        incorrect_url_warning = check_url(user, response_url, headers)
+        print(incorrect_url_warning.status_code)
 
     return Response(), 200
 
