@@ -105,7 +105,7 @@ def fetch_api_req(url, user, slack_webhook_url, headers):
             },
         )
         fetch_api_result = response.json()
-        print(fetch_api_result["screenshot"])
+        print(fetch_api_result)
         # f = open(f"{user}.html", "w")
         # f.write(zyte_api_result["browserHtml"])
         # f.close()
@@ -172,7 +172,7 @@ def fetch_api_req(url, user, slack_webhook_url, headers):
                 },
             )
             fetch_api_result = response.json()
-            print(fetch_api_result["screenshot"])
+            print(fetch_api_result)
             # f = open(f"{user}.html", "w")
             # f.write(zyte_api_result["browserHtml"])
             # f.close()
@@ -220,28 +220,28 @@ def fetch_api_req(url, user, slack_webhook_url, headers):
                 print(f"{user}.png has been removed!")
                 return zyte_resp
 
-    else:
-        fetch_api_result = {
-            "text": "Antibot Details",
-            "blocks": [
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": f"@{user} FetchAPI results for {url}:",
-                    },
-                },
-                {
-                    "type": "section",
-                    "block_id": "section567",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": f"Seems like a Ban! \n\n Reach out to #smartbrowser-support or troubleshoot manually. \n\n The Result is given below: \n\n {fetch_api_result}",
-                    },
-                },
-            ],
-        }
-        fetch_resp = requests.post(
-            url=slack_webhook_url, headers=headers, data=json.dumps(fetch_api_result),
-        )
-        return fetch_resp
+            else:
+                fetch_api_result = {
+                    "text": "Antibot Details",
+                    "blocks": [
+                        {
+                            "type": "section",
+                            "text": {
+                                "type": "mrkdwn",
+                                "text": f"@{user} FetchAPI results for {url}:",
+                            },
+                        },
+                        {
+                            "type": "section",
+                            "block_id": "section567",
+                            "text": {
+                                "type": "mrkdwn",
+                                "text": f"Seems like a Ban! \n\n Reach out to #smartbrowser-support or troubleshoot manually. \n\n The Result is given below: \n\n {fetch_api_result}",
+                            },
+                        },
+                    ],
+                }
+                fetch_resp = requests.post(
+                    url=slack_webhook_url, headers=headers, data=json.dumps(fetch_api_result),
+                )
+                return fetch_resp
