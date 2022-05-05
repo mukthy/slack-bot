@@ -7,7 +7,7 @@ from modes import (
     auto_xtract_article,
     dataset_project_id,
     fetch_api_screenshot,
-    netloc_config
+    netloc_config,
 )
 from invalid_url import check_url
 from slack_sdk import WebClient
@@ -553,6 +553,7 @@ def auto_x_article_lisitng(data, text, user, response_url):
 # the below function is to send a response as 200 to slack's post request within 3 sec to avoid the
 # "operation_timed_out" error.
 
+
 def slack_dataset_project_response():
     data = request.form
     text = data.get("text")
@@ -680,7 +681,7 @@ def slack_netloc_response():
 def netloc_func(data, text, user, response_url):
     print(data)
     print(user)
-    url = f'{text}'
+    url = f"{text}"
 
     # Using a function initial_message from netloc_config module of mode package
 
@@ -689,7 +690,8 @@ def netloc_func(data, text, user, response_url):
 
     # Using a function default_netloc_config from netloc_config module of mode package
     netloc_resp = netloc_config.default_netloc_config(
-        url, user, slack_webhook_url, headers, response_url)
+        url, user, slack_webhook_url, headers, response_url
+    )
     print(netloc_resp)
 
     return Response(), 200
