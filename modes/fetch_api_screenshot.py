@@ -242,6 +242,8 @@ def fetch_api_req(url, user, slack_webhook_url, headers):
                     ],
                 }
                 fetch_resp = requests.post(
-                    url=slack_webhook_url, headers=headers, data=json.dumps(fetch_api_result),
+                    url=slack_webhook_url,
+                    headers=headers,
+                    data=json.dumps(fetch_api_result),
                 )
                 return fetch_resp
