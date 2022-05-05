@@ -7,6 +7,7 @@ from modes import (
     auto_xtract_article,
     dataset_project_id,
     fetch_api_screenshot,
+    netloc_config
 )
 from invalid_url import check_url
 from slack_sdk import WebClient
@@ -40,6 +41,8 @@ auto_x_api = os.environ["AUTO_X_API"]
 headers = {
     "Content-type": "application/json",
 }
+
+
 # SLACK_BOT_TOKEN = os.environ["SLACK_BOT_TOKEN"]
 
 
@@ -550,7 +553,6 @@ def auto_x_article_lisitng(data, text, user, response_url):
 # the below function is to send a response as 200 to slack's post request within 3 sec to avoid the
 # "operation_timed_out" error.
 
-
 def slack_dataset_project_response():
     data = request.form
     text = data.get("text")
@@ -653,6 +655,42 @@ def fetchapi(data, text, user, response_url):
         # Using a function check_url from fetch_api_screenshot module of mode package
         incorrect_url_warning = check_url(user, response_url, headers)
         print(incorrect_url_warning.status_code)
+
+    return Response(), 200
+
+
+@app.route("/netloc-config", methods=["POST"])
+# the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
+def slack_netloc_response():
+    data = request.form
+    text = data.get("text")
+    validators.url(text)
+    user = data.get("user_name")
+    response_url = data["response_url"]
+    message = {"text": "Connection successful!"}
+    resp = requests.post(response_url, json=message)
+    print(resp.status_code)
+    netloc_thread = threading.Thread(
+        target=netloc_func, args=(data, text, user, response_url)
+    )
+    netloc_thread.start()
+    return "Processing, Please wait!!"
+
+
+def netloc_func(data, text, user, response_url):
+    print(data)
+    print(user)
+    url = f'{text}'
+
+    # Using a function initial_message from netloc_config module of mode package
+
+    initial_msg = netloc_config.initial_message(response_url, user)
+    print(initial_msg)
+
+    # Using a function default_netloc_config from netloc_config module of mode package
+    netloc_resp = netloc_config.default_netloc_config(
+        url, user, slack_webhook_url, headers, response_url)
+    print(netloc_resp)
 
     return Response(), 200
 
