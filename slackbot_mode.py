@@ -77,14 +77,8 @@ def check_antibot(data, text, user, response_url):
     url = f"{text}"
     if validators.url(url) is True:
 
-        initial_message = antibot.initial_message(user, slack_webhook_url, headers)
+        initial_message = antibot.initial_message(user, slack_webhook_url, headers, response_url, url)
         print(initial_message.status_code)
-
-        client.chat_postMessage(
-            channel="#antibot-checker",
-            text="Sending request to Antibotpedia",
-            response_type="in_channel",
-        )
 
         # the below is using get_page_id function from a custom module antibot under modes package.
         page_id = antibot.get_page_id(url, api)
@@ -94,24 +88,13 @@ def check_antibot(data, text, user, response_url):
         dict1 = json.loads(page_id.text)
         page = dict1["response"]["check_id"]
 
-        client.chat_postMessage(
-            channel="#antibot-checker",
-            text="Please wait. The scan takes atleast 1-2 mins time. Even on GUI",
-            response_type="in_channel",
-        )
-        client.chat_postMessage(
-            channel="#antibot-checker",
-            text=f"If you have access, you can check in the Web-UI: https://antibotpedia.scrapinghub.com/checks/pages/{page}",
-            response_type="in_channel",
-        )
-
         # the below is using final_result function from a custom module antibot under modes package.
-        final_result = antibot.final_result(page, api)
+        final_result = antibot.final_result(page, api, user, headers, response_url)
         print(final_result)
 
         # the below is using final_result function from a custom module antibot under modes package.
         final_antibot_result = antibot.post_antibot_results(
-            slack_webhook_url, headers, user, url, final_result
+            slack_webhook_url, headers, user, url, final_result, response_url
         )
         print(final_antibot_result.status_code)
     else:
