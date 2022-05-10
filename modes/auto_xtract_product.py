@@ -32,9 +32,10 @@ def product(url, response_url, headers, user, slack_webhook_url):
         auth=(f"{auto_x_api}", ""),
         json=[{"url": f"{url}", "pageType": "product"}],
     )
-    df = product_response.json()
+    df = json.loads(product_response.text)
+    df = json.dumps(df[0], indent=4)
 
-    # print(df)
+    print(df)
 
     if "error" in df[0]:
 
@@ -62,7 +63,7 @@ def product(url, response_url, headers, user, slack_webhook_url):
 
         # writing the response to the user.json file.
         f = open(f"{user}.json", "w")
-        f.write(str(json.dumps(df)))
+        f.write(str(df))
         f.close()
 
         auto_x_product_msg = {
@@ -111,9 +112,10 @@ def product_list(url, response_url, headers, user, slack_webhook_url):
         auth=(f"{auto_x_api}", ""),
         json=[{"url": f"{url}", "pageType": "productList"}],
     )
-    df = product_list_response.json()
+    df = json.loads(product_list_response.text)
+    df = json.dumps(df[0], indent=4)
 
-    # print(df)
+    print(df)
     if "error" in df[0]:
 
         print(df)
@@ -138,7 +140,7 @@ def product_list(url, response_url, headers, user, slack_webhook_url):
     else:
         # writing the response to the user.json file.
         f = open(f"{user}.json", "w")
-        f.write(str(json.dumps(df)))
+        f.write(str(df))
         f.close()
 
         auto_x_product_list_msg = {
