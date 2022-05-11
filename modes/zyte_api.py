@@ -28,10 +28,22 @@ channel_id = os.environ["CHANNEL_ID"]
 
 def zyte_api_req(url, user, slack_webhook_url, headers):
 
+    payload = json.dumps({
+        "url": f"{url}",
+        "browserHtml": True,
+        "javascript": True,
+        "httpResponseHeaders": True
+    })
+
+    header = {
+        'Content-Type': 'application/json'
+    }
+
     response = requests.post(
         zyte_api_url,
         auth=(zyte_api, ""),
-        json={"url": f"{url}", "browserHtml": True, "javascript": True},
+        headers=header,
+        data=payload,
     )
     zyte_api_result = response.json()
     if "browserHtml" in zyte_api_result:
