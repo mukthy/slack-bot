@@ -7,7 +7,7 @@ from modes import (
     auto_xtract_article,
     dataset_project_id,
     fetch_api_screenshot,
-    netloc_config,
+    netloc_config, uncork_config
 )
 from invalid_url import check_url
 from slack_sdk import WebClient
@@ -676,6 +676,41 @@ def netloc_func(data, text, user, response_url):
         url, user, slack_webhook_url, headers, response_url
     )
     print(netloc_resp)
+
+    return Response(), 200
+
+@app.route("/uncork-config", methods=["POST"])
+# the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
+def slack_uncork_response():
+    data = request.form
+    text = data.get("text")
+    validators.url(text)
+    user = data.get("user_name")
+    response_url = data["response_url"]
+    message = {"text": "Connection successful!"}
+    resp = requests.post(response_url, json=message)
+    print(resp.status_code)
+    uncork_thread = threading.Thread(
+        target=uncork_func, args=(data, text, user, response_url)
+    )
+    uncork_thread.start()
+    return "Processing, Please wait!!"
+
+
+def uncork_func(data, text, user, response_url):
+    print(data)
+    print(user)
+    url = f'{text}'
+
+    # Using a function initial_message from uncork_config module of mode package
+
+    initial_msg = uncork_config.initial_message(response_url, user)
+    print(initial_msg)
+
+    # Using a function default_uncork_config from uncork_config module of mode package
+    uncork_resp = uncork_config.default_uncork_config(
+        url, user, slack_webhook_url, headers, response_url)
+    print(uncork_resp)
 
     return Response(), 200
 
