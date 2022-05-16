@@ -27,3 +27,7 @@ Usage is given below:
 `/dataset-project-log org_id dataset_id` <= To get the Auto-Extraction Dataset Project Link.
 
 `/fetchapiscreenshot https://google.com` <= To get the FullPage Screenshot using FetchAPI (Uses different BrowserStack).
+
+`/netloc-config google.com` <= To get the Default/Global Netloc-Config from CCM to Slack.
+
+`/uncork-config google.com` <= To get the Default/Global Uncork-Config from CCM to Slack.
