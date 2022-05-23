@@ -696,6 +696,41 @@ def netloc_func(data, text, user, response_url):
 
     return Response(), 200
 
+@app.route("/netloc-config-orgid", methods=["POST"])
+# the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
+def slack_netloc_response():
+    data = request.form
+    text = data.get("text")
+    validators.url(text)
+    user = data.get("user_name")
+    response_url = data["response_url"]
+    message = {"text": "Connection successful!"}
+    resp = requests.post(response_url, json=message)
+    print(resp.status_code)
+    netloc_orgid_thread = threading.Thread(
+        target=netloc_orgid_func, args=(data, text, user, response_url)
+    )
+    netloc_orgid_thread.start()
+    return "Processing, Please wait!!"
+
+
+def netloc_orgid_func(data, text, user, response_url):
+    print(data)
+    print(user)
+    url = f'{text}'
+
+    # Using a function initial_message from netloc_config module of mode package
+
+    initial_msg = netloc_config.initial_message(response_url, user)
+    print(initial_msg)
+
+    # Using a function default_netloc_config from netloc_config module of mode package
+    netloc_resp = netloc_config.default_netloc_config(
+        url, user, slack_webhook_url, headers, response_url)
+    print(netloc_resp)
+
+    return Response(), 200
+
 
 if __name__ == "__main__":
     app.run(port=5050, debug=True)
