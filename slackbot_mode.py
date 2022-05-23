@@ -714,7 +714,6 @@ def uncork_func(data, text, user, response_url):
 
     return Response(), 200
 
-
 @app.route("/netloc-config-orgid", methods=["POST"])
 # the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
 def slack_netloc_response():

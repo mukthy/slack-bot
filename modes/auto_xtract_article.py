@@ -35,9 +35,10 @@ def article(url, response_url, headers, user, slack_webhook_url):
         auth=(f"{auto_x_api}", ""),
         json=[{"url": f"{url}", "pageType": "article"}],
     )
-    df = response.json()
+    df = json.loads(response.text)
+    df = json.dumps(df[0], indent=4)
 
-    # print(df)
+    print(df)
 
     if "error" in df[0]:
 
@@ -63,7 +64,7 @@ def article(url, response_url, headers, user, slack_webhook_url):
 
         # writing the response to the user.json file.
         f = open(f"{user}.json", "w")
-        f.write(str(json.dumps(df)))
+        f.write(str(df))
         f.close()
 
         auto_x_article_msg = {
@@ -113,9 +114,10 @@ def article_list(url, response_url, headers, user, slack_webhook_url):
         auth=(f"{auto_x_api}", ""),
         json=[{"url": f"{url}", "pageType": "articleList"}],
     )
-    df = response.json()
+    df = json.loads(response.text)
+    df = json.dumps(df[0], indent=4)
 
-    # print(df)
+    print(df)
 
     if "error" in df[0]:
 
@@ -141,7 +143,7 @@ def article_list(url, response_url, headers, user, slack_webhook_url):
 
         # writing the response to the user.json file.
         f = open(f"{user}.json", "w")
-        f.write(str(json.dumps(df)))
+        f.write(str(df))
         f.close()
 
         auto_x_article_msg = {
