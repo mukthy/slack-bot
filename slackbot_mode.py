@@ -7,7 +7,7 @@ from modes import (
     auto_xtract_article,
     dataset_project_id,
     fetch_api_screenshot,
-    netloc_config,
+    netloc_config, uncork_config
 )
 from invalid_url import check_url
 from slack_sdk import WebClient
@@ -77,14 +77,8 @@ def check_antibot(data, text, user, response_url):
     url = f"{text}"
     if validators.url(url) is True:
 
-        initial_message = antibot.initial_message(user, slack_webhook_url, headers)
+        initial_message = antibot.initial_message(user, slack_webhook_url, headers, response_url, url)
         print(initial_message.status_code)
-
-        client.chat_postMessage(
-            channel="#antibot-checker",
-            text="Sending request to Antibotpedia",
-            response_type="in_channel",
-        )
 
         # the below is using get_page_id function from a custom module antibot under modes package.
         page_id = antibot.get_page_id(url, api)
@@ -94,24 +88,13 @@ def check_antibot(data, text, user, response_url):
         dict1 = json.loads(page_id.text)
         page = dict1["response"]["check_id"]
 
-        client.chat_postMessage(
-            channel="#antibot-checker",
-            text="Please wait. The scan takes atleast 1-2 mins time. Even on GUI",
-            response_type="in_channel",
-        )
-        client.chat_postMessage(
-            channel="#antibot-checker",
-            text=f"If you have access, you can check in the Web-UI: https://antibotpedia.scrapinghub.com/checks/pages/{page}",
-            response_type="in_channel",
-        )
-
         # the below is using final_result function from a custom module antibot under modes package.
-        final_result = antibot.final_result(page, api)
+        final_result = antibot.final_result(page, api, user, headers, response_url)
         print(final_result)
 
         # the below is using final_result function from a custom module antibot under modes package.
         final_antibot_result = antibot.post_antibot_results(
-            slack_webhook_url, headers, user, url, final_result
+            slack_webhook_url, headers, user, url, final_result, response_url
         )
         print(final_antibot_result.status_code)
     else:
@@ -696,6 +679,76 @@ def netloc_func(data, text, user, response_url):
 
     return Response(), 200
 
+@app.route("/uncork-config", methods=["POST"])
+# the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
+def slack_uncork_response():
+    data = request.form
+    text = data.get("text")
+    validators.url(text)
+    user = data.get("user_name")
+    response_url = data["response_url"]
+    message = {"text": "Connection successful!"}
+    resp = requests.post(response_url, json=message)
+    print(resp.status_code)
+    uncork_thread = threading.Thread(
+        target=uncork_func, args=(data, text, user, response_url)
+    )
+    uncork_thread.start()
+    return "Processing, Please wait!!"
+
+
+def uncork_func(data, text, user, response_url):
+    print(data)
+    print(user)
+    url = f'{text}'
+
+    # Using a function initial_message from uncork_config module of mode package
+
+    initial_msg = uncork_config.initial_message(response_url, user)
+    print(initial_msg)
+
+    # Using a function default_uncork_config from uncork_config module of mode package
+    uncork_resp = uncork_config.default_uncork_config(
+        url, user, slack_webhook_url, headers, response_url)
+    print(uncork_resp)
+
+    return Response(), 200
+
+
+@app.route("/netloc-config-orgid", methods=["POST"])
+# the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
+def slack_netloc_response():
+    data = request.form
+    text = data.get("text")
+    validators.url(text)
+    user = data.get("user_name")
+    response_url = data["response_url"]
+    message = {"text": "Connection successful!"}
+    resp = requests.post(response_url, json=message)
+    print(resp.status_code)
+    netloc_orgid_thread = threading.Thread(
+        target=netloc_orgid_func, args=(data, text, user, response_url)
+    )
+    netloc_orgid_thread.start()
+    return "Processing, Please wait!!"
+
+
+def netloc_orgid_func(data, text, user, response_url):
+    print(data)
+    print(user)
+    url = f'{text}'
+
+    # Using a function initial_message from netloc_config module of mode package
+
+    initial_msg = netloc_config.initial_message(response_url, user)
+    print(initial_msg)
+
+    # Using a function default_netloc_config from netloc_config module of mode package
+    netloc_resp = netloc_config.default_netloc_config(
+        url, user, slack_webhook_url, headers, response_url)
+    print(netloc_resp)
+
+    return Response(), 200
 
 if __name__ == "__main__":
     app.run(port=5050, debug=True)
