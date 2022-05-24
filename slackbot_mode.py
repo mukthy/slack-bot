@@ -716,5 +716,68 @@ def uncork_func(data, text, user, response_url):
     return Response(), 200
 
 
+@app.route("/netloc-config-orgid", methods=["POST"])
+# the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
+def slack_netloc_orgid_response():
+    data = request.form
+    text = data.get("text")
+    validators.url(text)
+    user = data.get("user_name")
+    response_url = data["response_url"]
+    message = {"text": "Connection successful!"}
+    resp = requests.post(response_url, json=message)
+    print(resp.status_code)
+    netloc_orgid_thread = threading.Thread(
+        target=netloc_orgid_func, args=(data, text, user, response_url)
+    )
+    netloc_orgid_thread.start()
+    return "Processing, Please wait!!"
+
+
+def netloc_orgid_func(data, text, user, response_url):
+    print(data)
+    print(user)
+    url = f'{text}'
+
+    # Using a function initial_message from netloc_config module of mode package
+
+    org_netloc_string = (line.split(' ') for line in text.splitlines())
+
+    for org, netloc in org_netloc_string:
+        print(org)
+        if org.isdigit():
+            #check if the enter org is digit and if not then throw the else part.
+            print(org)
+            print(netloc)
+
+            initial_msg = netloc_config_orgid.initial_message(response_url, user)
+            print(initial_msg)
+
+            # Using a function default_netloc_config from netloc_config module of mode package
+            netloc_resp = netloc_config_orgid.default_netloc_config_orgid(
+                org, netloc, url, user, slack_webhook_url, headers, response_url)
+            print(netloc_resp)
+
+        else:
+
+            incorrect_org_msg = {
+                "blocks": [
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": f"@{user} Enter the ORG ID first and then netloc\n For Eg: /netloc-config-orgid ORG_ID Netloc\n",
+                        },
+                    }
+                ]
+            }
+            incorrect_org_response = requests.post(
+                url=response_url,
+                headers=headers,
+                data=json.dumps(incorrect_org_msg),
+            )
+            print(incorrect_org_response.status_code)
+
+
 if __name__ == "__main__":
     app.run(port=5050, debug=True)
