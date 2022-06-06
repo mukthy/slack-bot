@@ -7,7 +7,7 @@ from modes import (
     auto_xtract_article,
     dataset_project_id,
     fetch_api_screenshot,
-    netloc_config, uncork_config
+    netloc_config, uncork_config, netloc_config_orgid
 )
 from invalid_url import check_url
 from slack_sdk import WebClient
@@ -54,7 +54,7 @@ def home():
     return render_template("home.html")
 
 
-@app.route("/antibot", methods=["POST"])
+@app.route("/zytebot-antibot", methods=["POST"])
 def slack_response():
     data = request.form
     text = data.get("text")
@@ -106,7 +106,7 @@ def check_antibot(data, text, user, response_url):
     return Response(), 200
 
 
-@app.route("/help", methods=["POST"])
+@app.route("/zytebot-help", methods=["POST"])
 def slack_help():
     data = request.form
     user = data.get("user_name")
@@ -134,7 +134,7 @@ def slack_help():
 # Region Checking Endpoint
 
 
-@app.route("/regioncheck", methods=["POST"])
+@app.route("/zytebot-regioncheck", methods=["POST"])
 # the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
 def slack_crawlbot_response():
     data = request.form
@@ -276,7 +276,7 @@ def crawlbot(data, text, user, response_url):
     return Response(), 200
 
 
-@app.route("/zytedataapi", methods=["POST"])
+@app.route("/zytebot-zytedataapi", methods=["POST"])
 # the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
 def slack_zyteapi_response():
     data = request.form
@@ -319,7 +319,7 @@ def zytedataapi(data, text, user, response_url):
     return Response(), 200
 
 
-@app.route("/netlock-dc", methods=["POST"])
+@app.route("/zytebot-netlock-dc", methods=["POST"])
 # the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
 def slack_netlock_dc_response():
     data = request.form
@@ -356,7 +356,7 @@ def netlock_dc(data, text, user, response_url):
 # Single Product Only
 
 
-@app.route("/auto-x-product", methods=["POST"])
+@app.route("/zytebot-auto-x-product", methods=["POST"])
 # the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
 def slack_auto_x_product_response():
     data = request.form
@@ -401,7 +401,7 @@ def auto_x_product(data, text, user, response_url):
 # Product Listing
 
 
-@app.route("/auto-x-product-listing", methods=["POST"])
+@app.route("/zytebot-auto-x-product-listing", methods=["POST"])
 # the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
 def slack_auto_x_product_lisitng_response():
     data = request.form
@@ -446,7 +446,7 @@ def auto_x_product_lisitng(data, text, user, response_url):
 # Article Only
 
 
-@app.route("/auto-x-article", methods=["POST"])
+@app.route("/zytebot-auto-x-article", methods=["POST"])
 # the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
 def slack_auto_x_article_response():
     data = request.form
@@ -490,7 +490,7 @@ def auto_x_article(data, text, user, response_url):
 # article_list only
 
 
-@app.route("/auto-x-article-list", methods=["POST"])
+@app.route("/zytebot-auto-x-article-list", methods=["POST"])
 # the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
 def slack_auto_x_article_lisitng_response():
     data = request.form
@@ -532,7 +532,7 @@ def auto_x_article_lisitng(data, text, user, response_url):
     return Response(), 200
 
 
-@app.route("/dataset-project-log", methods=["POST"])
+@app.route("/zytebot-dataset-project-log", methods=["POST"])
 # the below function is to send a response as 200 to slack's post request within 3 sec to avoid the
 # "operation_timed_out" error.
 
@@ -600,7 +600,7 @@ def dataset_project(data, text, user, response_url):
     return Response(), 200
 
 
-@app.route("/fetchapiscreenshot", methods=["POST"])
+@app.route("/zytebot-fetchapiscreenshot", methods=["POST"])
 # the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
 def slack_fetchapi_response():
     data = request.form
@@ -643,7 +643,7 @@ def fetchapi(data, text, user, response_url):
     return Response(), 200
 
 
-@app.route("/netloc-config", methods=["POST"])
+@app.route("/zytebot-netloc-config", methods=["POST"])
 # the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
 def slack_netloc_response():
     data = request.form
@@ -680,7 +680,7 @@ def netloc_func(data, text, user, response_url):
     return Response(), 200
 
 
-@app.route("/uncork-config", methods=["POST"])
+@app.route("/zytebot-uncork-config", methods=["POST"])
 # the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
 def slack_uncork_response():
     data = request.form
@@ -715,7 +715,7 @@ def uncork_func(data, text, user, response_url):
 
     return Response(), 200
 
-@app.route("/netloc-config-orgid", methods=["POST"])
+@app.route("/zytebot-netloc-config-orgid", methods=["POST"])
 # the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
 def slack_netloc_response():
     data = request.form
@@ -750,7 +750,7 @@ def netloc_orgid_func(data, text, user, response_url):
 
     return Response(), 200
 
-@app.route("/netloc-config-orgid", methods=["POST"])
+@app.route("/zytebot-netloc-config-orgid", methods=["POST"])
 # the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
 def slack_netloc_orgid_response():
     data = request.form
