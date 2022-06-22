@@ -7,7 +7,7 @@ from modes import (
     auto_xtract_article,
     dataset_project_id,
     fetch_api_screenshot,
-    netloc_config, uncork_config, netloc_config_orgid
+    netloc_config, uncork_config, netloc_config_orgid, start_command
 )
 from invalid_url import check_url
 from slack_sdk import WebClient
@@ -812,6 +812,50 @@ def netloc_orgid_func(data, text, user, response_url):
             )
             print(incorrect_org_response.status_code)
 
+
+@app.route("/zytebot-playwright", methods=["POST"])
+# the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
+def slack_playwright_response():
+    data = request.form
+    text = data.get("text")
+    validators.url(text)
+    user = data.get("user_name")
+    response_url = data["response_url"]
+    message = {"text": "Connection successful!"}
+    resp = requests.post(response_url, json=message)
+    print(resp.status_code)
+    playwright_thread = threading.Thread(
+        target=playwright_func, args=(data, text, user, response_url)
+    )
+    playwright_thread.start()
+    return "Processing, Please wait!!"
+
+
+def playwright_func(data, text, user, response_url):
+    print(data)
+    print(user)
+    url = f'{text}'
+
+    if validators.url(url) is True:
+        # Using a function initial_message from uncork_config module of mode package
+
+        initial_msg = start_command.initial_message(response_url, user)
+        print(initial_msg)
+
+        # Using a function default_uncork_config from uncork_config module of mode package
+        playwright_resp = start_command.start(
+            url, user, slack_webhook_url, headers, response_url)
+        print(playwright_resp)
+
+        return Response(), 200
+
+    else:
+
+        # the below is using check_url function from a custom module invalid_url.
+        incorrect_url_message = check_url(
+            user, response_url, headers)
+        print(incorrect_url_message)
+        
 
 if __name__ == "__main__":
     app.run(port=5050, debug=True)
