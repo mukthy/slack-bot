@@ -857,5 +857,49 @@ def playwright_func(data, text, user, response_url):
         print(incorrect_url_message)
         
 
+@app.route("/zytebot-puppeteer", methods=["POST"])
+# the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
+def slack_puppeteer_response():
+    data = request.form
+    text = data.get("text")
+    validators.url(text)
+    user = data.get("user_name")
+    response_url = data["response_url"]
+    message = {"text": "Connection successful!"}
+    resp = requests.post(response_url, json=message)
+    print(resp.status_code)
+    puppeteer_thread = threading.Thread(
+        target=puppeteer_func, args=(data, text, user, response_url)
+    )
+    puppeteer_thread.start()
+    return "Processing, Please wait!!"
+
+
+def puppeteer_func(data, text, user, response_url):
+    print(data)
+    print(user)
+    url = f'{text}'
+
+    if validators.url(url) is True:
+        # Using a function initial_message from puppeteer_start module of mode package
+
+        initial_msg = puppeteer_start.initial_message(response_url, user)
+        print(initial_msg)
+
+        # Using a function start from puppeteer_start module of mode package
+        puppeteer_resp = puppeteer_start.start(
+            url, user, slack_webhook_url, headers, response_url)
+        print(puppeteer_resp)
+
+        return Response(), 200
+
+    else:
+
+        # the below is using check_url function from a custom module invalid_url.
+        incorrect_url_message = check_url(
+            user, response_url, headers)
+        print(incorrect_url_message)
+
+
 if __name__ == "__main__":
     app.run(port=5050, debug=True)
