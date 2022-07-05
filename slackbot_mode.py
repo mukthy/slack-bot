@@ -7,7 +7,7 @@ from modes import (
     auto_xtract_article,
     dataset_project_id,
     fetch_api_screenshot,
-    netloc_config, uncork_config, netloc_config_orgid, start_command
+    netloc_config, uncork_config, netloc_config_orgid, start_command, zyte_api_screenshot, puppeteer_start
 )
 from invalid_url import check_url
 from slack_sdk import WebClient
@@ -899,6 +899,50 @@ def puppeteer_func(data, text, user, response_url):
         incorrect_url_message = check_url(
             user, response_url, headers)
         print(incorrect_url_message)
+
+
+@app.route("/zytebot-zytedataapi-screenshot", methods=["POST"])
+# the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
+def slack_zytedataapi_response():
+    data = request.form
+    text = data.get("text")
+    validators.url(text)
+    user = data.get("user_name")
+    response_url = data["response_url"]
+    message = {"text": "Connection successful!"}
+    resp = requests.post(response_url, json=message)
+    print(resp.status_code)
+    zytedataapi_screen = threading.Thread(
+        target=zytedataapi_screenshot, args=(data, text, user, response_url)
+    )
+    zytedataapi_screen.start()
+    return "Processing, Please wait!!"
+
+
+def zytedataapi_screenshot(data, text, user, response_url):
+    print(data)
+    print(user)
+    url = f'{text}'
+
+    if validators.url(text) is True:
+
+        # Using a function initial_message from zyte_api module of mode package
+
+        initial_msg = fetch_api_screenshot.initial_message(response_url, user)
+        print(initial_msg)
+
+        # Using a function zyte_api_req from zyte_api module of mode package
+        zytedataapi_screenshot_resp = zyte_api_screenshot.zyte_api_screenshot(
+            url, user, slack_webhook_url, headers)
+        print(zytedataapi_screenshot_resp)
+
+    else:
+
+        # Using a function check_url from zyte_api module of mode package
+        incorrect_url_warning = check_url(user, response_url, headers)
+        print(incorrect_url_warning.status_code)
+
+    return Response(), 200
 
 
 if __name__ == "__main__":
