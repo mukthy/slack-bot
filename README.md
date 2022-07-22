@@ -31,3 +31,9 @@ Usage is given below:
 `/zytebot-netloc-config google.com` <= To get the Default/Global Netloc-Config from CCM to Slack.
 
 `/zytebot-uncork-config google.com` <= To get the Default/Global Uncork-Config from CCM to Slack.
+
+`/zytebot-playwright google.com` <= To get a screenshot of domain using playwright.
+
+`/zytebot-puppeteer google.com` <= To get a screenshot of domain using puppeteer.
+
+`/zytebot-zytedataapi-screenshot https://example.com` <= ZyteDataAPI Screenshot API
