@@ -945,5 +945,41 @@ def zytedataapi_screenshot(data, text, user, response_url):
     return Response(), 200
 
 
+@app.route("/zytebot-curlconvertor", methods=["POST"])
+# the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
+def curlconvertor_response():
+    data = request.form
+    text = data.get("text")
+    validators.url(text)
+    user = data.get("user_name")
+    response_url = data["response_url"]
+    message = {"text": "Connection successful!"}
+    resp = requests.post(response_url, json=message)
+    print(resp.status_code)
+    curl_conv = threading.Thread(
+        target=curl_convertor, args=(data, text, user, response_url)
+    )
+    curl_conv.start()
+    return "Processing, Please wait!!"
+
+
+def curl_convertor(data, text, user, response_url):
+    print(data)
+    print(user)
+    curl_input = f'{text}'
+    print(curl_input)
+
+    # Using a function initial_message from zyte_api module of mode package
+
+    initial_msg = curlconverter.initial_message(response_url, headers, user)
+    print(initial_msg)
+
+    # Using a function zyte_api_req from zyte_api module of mode package
+    curlconverter_resp = curlconverter.convert(curl_input, user, slack_webhook_url, headers, response_url)
+    print(curlconverter_resp)
+
+    return Response(), 200
+
+
 if __name__ == "__main__":
     app.run(port=5050, debug=True)
