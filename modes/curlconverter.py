@@ -27,6 +27,11 @@ def initial_message(response_url, headers, user):
 
 def convert(curl_input, user, slack_webhook_url, headers, response_url):
     # curl_input = input("Enter curl command: ")
+    curl_input = curl_input.replace("’", "'")
+    curl_input = curl_input.replace("‘", "'")
+    curl_input = curl_input.replace("\'", "'")
+    curl_input = curl_input.replace("\\\n  ", "")
+    curl_input = curl_input.replace(r"\-H", "-H")
     req_output = uncurl.parse(f"{curl_input}")
 
     with open(f"/home/mukthy/temp_files/{user}.py", "w") as f:
