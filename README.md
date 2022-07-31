@@ -37,3 +37,5 @@ Usage is given below:
 `/zytebot-puppeteer google.com` <= To get a screenshot of domain using puppeteer.
 
 `/zytebot-zytedataapi-screenshot https://example.com` <= ZyteDataAPI Screenshot API
+
+`/zytebot-curlconvertor curl -U APIKEY: -x proxy.crawlera.com:8010 ‘https://www.amazon.in/Pure-Source-India-Reed-Sticks/dp/B079KCG68Y/'` <= ZyteDataAPI Screenshot API
