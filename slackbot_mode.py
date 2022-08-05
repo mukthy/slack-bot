@@ -7,7 +7,14 @@ from modes import (
     auto_xtract_article,
     dataset_project_id,
     fetch_api_screenshot,
-    netloc_config, uncork_config, netloc_config_orgid, start_command, zyte_api_screenshot, puppeteer_start
+    netloc_config,
+    uncork_config,
+    netloc_config_orgid,
+    start_command,
+    zyte_api_screenshot,
+    puppeteer_start,
+    antibot_bulk,
+    curlconverter,
 )
 from invalid_url import check_url
 from slack_sdk import WebClient
@@ -77,7 +84,9 @@ def check_antibot(data, text, user, response_url):
     url = f"{text}"
     if validators.url(url) is True:
 
-        initial_message = antibot.initial_message(user, slack_webhook_url, headers, response_url, url)
+        initial_message = antibot.initial_message(
+            user, slack_webhook_url, headers, response_url, url
+        )
         print(initial_message.status_code)
 
         # the below is using get_page_id function from a custom module antibot under modes package.
@@ -701,7 +710,7 @@ def slack_uncork_response():
 def uncork_func(data, text, user, response_url):
     print(data)
     print(user)
-    url = f'{text}'
+    url = f"{text}"
 
     # Using a function initial_message from uncork_config module of mode package
 
@@ -710,10 +719,12 @@ def uncork_func(data, text, user, response_url):
 
     # Using a function default_uncork_config from uncork_config module of mode package
     uncork_resp = uncork_config.default_uncork_config(
-        url, user, slack_webhook_url, headers, response_url)
+        url, user, slack_webhook_url, headers, response_url
+    )
     print(uncork_resp)
 
     return Response(), 200
+
 
 @app.route("/zytebot-netloc-config-orgid", methods=["POST"])
 # the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
@@ -736,7 +747,7 @@ def slack_netloc_response():
 def netloc_orgid_func(data, text, user, response_url):
     print(data)
     print(user)
-    url = f'{text}'
+    url = f"{text}"
 
     # Using a function initial_message from netloc_config module of mode package
 
@@ -745,10 +756,12 @@ def netloc_orgid_func(data, text, user, response_url):
 
     # Using a function default_netloc_config from netloc_config module of mode package
     netloc_resp = netloc_config.default_netloc_config(
-        url, user, slack_webhook_url, headers, response_url)
+        url, user, slack_webhook_url, headers, response_url
+    )
     print(netloc_resp)
 
     return Response(), 200
+
 
 @app.route("/zytebot-netloc-config-orgid", methods=["POST"])
 # the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
@@ -771,16 +784,16 @@ def slack_netloc_orgid_response():
 def netloc_orgid_func(data, text, user, response_url):
     print(data)
     print(user)
-    url = f'{text}'
+    url = f"{text}"
 
     # Using a function initial_message from netloc_config module of mode package
 
-    org_netloc_string = (line.split(' ') for line in text.splitlines())
+    org_netloc_string = (line.split(" ") for line in text.splitlines())
 
     for org, netloc in org_netloc_string:
         print(org)
         if org.isdigit():
-            #check if the enter org is digit and if not then throw the else part.
+            # check if the enter org is digit and if not then throw the else part.
             print(org)
             print(netloc)
 
@@ -789,7 +802,8 @@ def netloc_orgid_func(data, text, user, response_url):
 
             # Using a function default_netloc_config from netloc_config module of mode package
             netloc_resp = netloc_config_orgid.default_netloc_config_orgid(
-                org, netloc, url, user, slack_webhook_url, headers, response_url)
+                org, netloc, url, user, slack_webhook_url, headers, response_url
+            )
             print(netloc_resp)
 
         else:
@@ -806,9 +820,7 @@ def netloc_orgid_func(data, text, user, response_url):
                 ]
             }
             incorrect_org_response = requests.post(
-                url=response_url,
-                headers=headers,
-                data=json.dumps(incorrect_org_msg),
+                url=response_url, headers=headers, data=json.dumps(incorrect_org_msg),
             )
             print(incorrect_org_response.status_code)
 
@@ -834,7 +846,7 @@ def slack_playwright_response():
 def playwright_func(data, text, user, response_url):
     print(data)
     print(user)
-    url = f'{text}'
+    url = f"{text}"
 
     if validators.url(url) is True:
         # Using a function initial_message from uncork_config module of mode package
@@ -844,7 +856,8 @@ def playwright_func(data, text, user, response_url):
 
         # Using a function default_uncork_config from uncork_config module of mode package
         playwright_resp = start_command.start(
-            url, user, slack_webhook_url, headers, response_url)
+            url, user, slack_webhook_url, headers, response_url
+        )
         print(playwright_resp)
 
         return Response(), 200
@@ -852,10 +865,9 @@ def playwright_func(data, text, user, response_url):
     else:
 
         # the below is using check_url function from a custom module invalid_url.
-        incorrect_url_message = check_url(
-            user, response_url, headers)
+        incorrect_url_message = check_url(user, response_url, headers)
         print(incorrect_url_message)
-        
+
 
 @app.route("/zytebot-puppeteer", methods=["POST"])
 # the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
@@ -878,7 +890,7 @@ def slack_puppeteer_response():
 def puppeteer_func(data, text, user, response_url):
     print(data)
     print(user)
-    url = f'{text}'
+    url = f"{text}"
 
     if validators.url(url) is True:
         # Using a function initial_message from puppeteer_start module of mode package
@@ -888,7 +900,8 @@ def puppeteer_func(data, text, user, response_url):
 
         # Using a function start from puppeteer_start module of mode package
         puppeteer_resp = puppeteer_start.start(
-            url, user, slack_webhook_url, headers, response_url)
+            url, user, slack_webhook_url, headers, response_url
+        )
         print(puppeteer_resp)
 
         return Response(), 200
@@ -896,8 +909,7 @@ def puppeteer_func(data, text, user, response_url):
     else:
 
         # the below is using check_url function from a custom module invalid_url.
-        incorrect_url_message = check_url(
-            user, response_url, headers)
+        incorrect_url_message = check_url(user, response_url, headers)
         print(incorrect_url_message)
 
 
@@ -922,7 +934,7 @@ def slack_zytedataapi_response():
 def zytedataapi_screenshot(data, text, user, response_url):
     print(data)
     print(user)
-    url = f'{text}'
+    url = f"{text}"
 
     if validators.url(text) is True:
 
@@ -933,7 +945,8 @@ def zytedataapi_screenshot(data, text, user, response_url):
 
         # Using a function zyte_api_req from zyte_api module of mode package
         zytedataapi_screenshot_resp = zyte_api_screenshot.zyte_api_screenshot(
-            url, user, slack_webhook_url, headers)
+            url, user, slack_webhook_url, headers
+        )
         print(zytedataapi_screenshot_resp)
 
     else:
@@ -966,7 +979,7 @@ def curlconvertor_response():
 def curl_convertor(data, text, user, response_url):
     print(data)
     print(user)
-    curl_input = f'{text}'
+    curl_input = f"{text}"
     print(curl_input)
 
     # Using a function initial_message from zyte_api module of mode package
@@ -975,8 +988,53 @@ def curl_convertor(data, text, user, response_url):
     print(initial_msg)
 
     # Using a function zyte_api_req from zyte_api module of mode package
-    curlconverter_resp = curlconverter.convert(curl_input, user, slack_webhook_url, headers, response_url)
+    curlconverter_resp = curlconverter.convert(
+        curl_input, user, slack_webhook_url, headers, response_url
+    )
     print(curlconverter_resp)
+
+    return Response(), 200
+
+
+@app.route("/zytebot-antibot-bulk", methods=["POST"])
+# the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
+def antibot_bulk_response():
+    data = request.form
+    text = data.get("text")
+    validators.url(text)
+    user = data.get("user_name")
+    response_url = data["response_url"]
+    message = {"text": "Connection successful!"}
+    resp = requests.post(response_url, json=message)
+    print(resp.status_code)
+    antibot_bulk_thread = threading.Thread(
+        target=antibot_bulk_scan, args=(data, text, user, response_url)
+    )
+    antibot_bulk_thread.start()
+    return "Processing, Please wait!!"
+
+
+def antibot_bulk_scan(data, text, user, response_url):
+    print(data)
+    print(user)
+    urls = f"{text}"
+    # print(urls)
+    print(urls)
+
+    # Using a function initial_message from antibot_bulk module of mode package
+    initial_msg = antibot_bulk.initial_message(
+        user, slack_webhook_url, headers, response_url, urls
+    )
+    print(initial_msg)
+
+    # Using a function check_url from antibot_bulk module of mode package
+    valid, invalid = antibot_bulk.check_url(urls)
+    print(valid, invalid)
+
+    post_results = antibot_bulk.post_results(
+        user, headers, response_url, urls, valid, invalid
+    )
+    print(post_results)
 
     return Response(), 200
 
