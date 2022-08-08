@@ -32,7 +32,12 @@ def zyte_api_req(url, user, slack_webhook_url, headers):
         "url": f"{url}",
         "browserHtml": True,
         "javascript": True,
-        "httpResponseHeaders": True
+        "httpResponseHeaders": True,
+        "actions": [
+            {
+                "timeout": 15,
+                "action": "waitForTimeout"
+            }],
     })
 
     header = {
@@ -53,13 +58,13 @@ def zyte_api_req(url, user, slack_webhook_url, headers):
         f.write(zyte_api_result["browserHtml"])
         f.close()
         zyte_data_api_result = {
-            "text": "Antibot Details",
+            "text": "ZyteDataAPI Details",
             "blocks": [
                 {
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": f"@{user} Zyte Data API results for {url}:",
+                        "text": f"@{user} Zyte Data API results for {url} with 15sec waitForTimeout action:",
                     },
                 },
                 # {
@@ -105,7 +110,7 @@ def zyte_api_req(url, user, slack_webhook_url, headers):
                     "block_id": "section567",
                     "text": {
                         "type": "mrkdwn",
-                        "text": f"Seems like a Ban! \n\n Reach out to #uncork team. \n\n The Result is given below: \n\n {zyte_api_result}",
+                        "text": f"Seems like a Ban! \n\n Reach out to #smartbrowser-support. \n\n The Result is given below: \n\n {zyte_api_result}",
                     },
                 },
             ],
