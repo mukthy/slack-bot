@@ -15,6 +15,7 @@ from modes import (
     puppeteer_start,
     antibot_bulk,
     curlconverter,
+    spm_observer
 )
 from invalid_url import check_url
 from slack_sdk import WebClient
@@ -1035,6 +1036,69 @@ def antibot_bulk_scan(data, text, user, response_url):
         user, headers, response_url, urls, valid, invalid
     )
     print(post_results)
+
+    return Response(), 200
+
+
+@app.route("/zytebot-spm-observer", methods=["POST"])
+# the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
+def spm_observer_response():
+    data = request.form
+    text = data.get("text")
+    validators.url(text)
+    user = data.get("user_name")
+    response_url = data["response_url"]
+    message = {"text": "Connection successful!"}
+    resp = requests.post(response_url, json=message)
+    print(resp.status_code)
+    spm_observer_thread = threading.Thread(
+        target=observer, args=(data, text, user, response_url)
+    )
+    spm_observer_thread.start()
+    return "Processing, Please wait!!"
+
+
+def observer(data, text, user, response_url):
+    print(data)
+    print(user)
+    text_data = f'{text}'
+    # print(urls)
+    print(text_data)
+
+    text_data = text_data.split(', ')
+    print([text_data])
+
+    # splitting the text data into 3 parts
+    if len(text_data) == 3:
+        org_id = text_data[0]
+        crawlera_node = text_data[1]
+        count = int(text_data[2])
+        print(org_id)
+        print(crawlera_node)
+        print(count)
+
+        # Using a function initial_message from zyte_api module of mode package
+        initial_msg = spm_observer.initial_message(user, slack_webhook_url, headers, response_url)
+        print(initial_msg)
+
+        # Using a function spm_interceptor from spm_observer module of mode package
+        result = spm_observer.spm_interceptor(org_id, crawlera_node, count, user, response_url, headers)
+        print(result['status'])
+
+        if result['status'] == 'error':
+
+            error_msg = spm_observer.error_message(user, response_url, headers, result)
+            print(error_msg)
+
+        elif result['status'] == 'ok':
+            # Using a function spm_interceptor from spm_observer module of mode package
+            post_results = spm_observer.post_results(user, headers, slack_webhook_url, org_id, crawlera_node)
+            print(post_results)
+
+    else:
+        print('Enter the correct format')
+        incorrect_format = spm_observer.incorrect_format(response_url, user, headers)
+        print(incorrect_format)
 
     return Response(), 200
 
