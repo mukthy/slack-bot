@@ -41,3 +41,5 @@ Usage is given below:
 `/zytebot-curlconvertor curl -U APIKEY: -x proxy.crawlera.com:8010 ‘https://www.amazon.in/Pure-Source-India-Reed-Sticks/dp/B079KCG68Y/'` <= ZyteDataAPI Screenshot API
 
 `/zytebot-antibot-bulk https://www.usphonebook.com/, menards.com, https://allegro.pl/, https://google.com, petflow` <= Performs Bulk AntiBot Scan. Make sure there is a coma and space between domains. 
+
+`/zytebot-spm-observer 382142, cm-31-sep020, 10` <= Utilizes the SPM Observer/Tracer to get intercepted logs. 
