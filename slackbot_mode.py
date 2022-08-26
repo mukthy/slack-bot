@@ -15,6 +15,9 @@ from modes import (
     puppeteer_start,
     antibot_bulk,
     curlconverter,
+    spm_observer,
+    initial_msg,
+    kibana,
     spm_observer
 )
 from invalid_url import check_url
@@ -1098,6 +1101,58 @@ def observer(data, text, user, response_url):
     else:
         print('Enter the correct format')
         incorrect_format = spm_observer.incorrect_format(response_url, user, headers)
+        print(incorrect_format)
+
+    return Response(), 200
+
+
+@app.route("/zytebot-kibana", methods=["POST"])
+# the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
+def kibana_response():
+    data = request.form
+    text = data.get("text")
+    validators.url(text)
+    user = data.get("user_name")
+    response_url = data["response_url"]
+    message = {"text": "Connection successful!"}
+    resp = requests.post(response_url, json=message)
+    print(resp.status_code)
+    kibana_thread = threading.Thread(
+        target=kibana_data, args=(data, text, user, response_url)
+    )
+    kibana_thread.start()
+    return "Processing, Please wait!!"
+
+
+def kibana_data(data, text, user, response_url):
+    print(data)
+    print(user)
+    text_data = f'{text}'
+    text_data = text_data.split(', ')
+    print([text_data])
+
+    if len(text_data) == 2:
+
+        org_id = text_data[0]
+        netloc = text_data[1]
+        print(org_id)
+        print(netloc)
+
+        # Using a function initial_message from zyte_api module of mode package
+        task = 'Kibana Task'
+        response = initial_msg.initial_message(response_url, headers, user, task)
+        print(response)
+
+        # Using a function zyte_api_req from zyte_api module of mode package
+        results = kibana.get_kibana_data(org_id, netloc, user, response_url, headers)
+        print(results)
+
+        post_results = kibana.post_results(response_url, user, headers, results, netloc)
+        print(post_results)
+
+    else:
+        print('Enter the correct format')
+        incorrect_format = initial_msg.incorrect_format(response_url, headers, user)
         print(incorrect_format)
 
     return Response(), 200
