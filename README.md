@@ -43,3 +43,5 @@ Usage is given below:
 `/zytebot-antibot-bulk https://www.usphonebook.com/, menards.com, https://allegro.pl/, https://google.com, petflow` <= Performs Bulk AntiBot Scan. Make sure there is a coma and space between domains. 
 
 `/zytebot-spm-observer 382142, cm-31-sep020, 10` <= Utilizes the SPM Observer/Tracer to get intercepted logs. 
+
+`/zytebot-kibaba 382142, amazon.com` <= Gets data from Kibana for the last 24 hours only.
