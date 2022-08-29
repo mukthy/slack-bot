@@ -278,7 +278,7 @@ def get_kibana_data(org_id, netloc, user, response_url, headers) -> Union[str, d
     return full_result
 
 
-def post_results(response_url, user, headers, results, netloc) -> str or dict[str, Any]:
+def post_results(response_url, user, headers, results, netloc, temp_url) -> str or dict[str, Any]:
     post_message = {
         "text": "Kibana Results",
         "blocks": [
@@ -287,7 +287,7 @@ def post_results(response_url, user, headers, results, netloc) -> str or dict[st
                 "block_id": "section567",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"@{user} Kibana Data for {netloc} is given below:\n {results}"
+                    "text": f"@{user} You can also use Kibana Temp URL:\n {temp_url}\n\n Kibana Data for {netloc} is given below:\n {results}"
                 },
             },
         ],
