@@ -18,7 +18,8 @@ from modes import (
     spm_observer,
     initial_msg,
     kibana,
-    spm_observer
+    spm_observer,
+    kibana_temp_url
 )
 from invalid_url import check_url
 from slack_sdk import WebClient
@@ -1138,12 +1139,16 @@ def kibana_data(data, text, user, response_url):
         print(org_id)
         print(netloc)
 
-        # Using a function initial_message from zyte_api module of mode package
+        # Using a function initial_message from initial_message module of mode package
         task = 'Kibana Task'
         response = initial_msg.initial_message(response_url, headers, user, task)
         print(response)
 
-        # Using a function zyte_api_req from zyte_api module of mode package
+        # Using a function kibana_temp_link from kibana_temp_url module of mode package
+        temp_url = kibana_temp_url.kibana_temp_link(org_id, netloc)
+        print(temp_url)
+
+        # Using a function get_kibana_data from kibana module of mode package
         results = kibana.get_kibana_data(org_id, netloc, user, response_url, headers)
         print(results)
 
