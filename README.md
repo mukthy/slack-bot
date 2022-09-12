@@ -45,3 +45,5 @@ Usage is given below:
 `/zytebot-spm-observer 382142, cm-31-sep020, 10` <= Utilizes the SPM Observer/Tracer to get intercepted logs. 
 
 `/zytebot-kibaba 382142, amazon.com` <= Gets data from Kibana for the last 24 hours only and it also get the temp link to the Kibana dashboard with ORG and Netloc.
+
+`/freshchat-agents` <= Checks who is available on FreshChat.
