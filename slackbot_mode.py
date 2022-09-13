@@ -20,7 +20,8 @@ from modes import (
     kibana,
     spm_observer,
     kibana_temp_url,
-    freshchat_agent_available
+    freshchat_agent_available,
+    freshdesk_agent_availability
 )
 from invalid_url import check_url
 from slack_sdk import WebClient
@@ -1191,6 +1192,38 @@ def agent_status(data, text, user, response_url):
     print(agent_results)
 
     post_results = freshchat_agent_available.post_results(user, headers, response_url, agent_results)
+    print(post_results)
+
+    return Response(), 200
+
+
+@app.route("/freshdesk-agents", methods=["POST"])
+# the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
+def freshdesk_agents_response():
+    data = request.form
+    text = data.get("text")
+    validators.url(text)
+    user = data.get("user_name")
+    response_url = data["response_url"]
+    message = {"text": "Connection successful!"}
+    resp = requests.post(response_url, json=message)
+    print(resp.status_code)
+    freshdesk_agents_thread = threading.Thread(
+        target=freshdesk_agents, args=(data, text, user, response_url)
+    )
+    freshdesk_agents_thread.start()
+    return "Processing, Please wait!!"
+
+
+def freshdesk_agents(data, text, user, response_url):
+    print(data)
+    print(user)
+
+    # Using a function check_agent_availability from freshdesk_agent_availability module of mode package
+    freshdesk_agents_result = freshdesk_agent_availability.check_agent_availability()
+    print(freshdesk_agents_result)
+
+    post_results = freshdesk_agent_availability.post_results(user, headers, response_url, freshdesk_agents_result)
     print(post_results)
 
     return Response(), 200
