@@ -47,3 +47,5 @@ Usage is given below:
 `/zytebot-kibaba 382142, amazon.com` <= Gets data from Kibana for the last 24 hours only and it also get the temp link to the Kibana dashboard with ORG and Netloc.
 
 `/freshchat-agents` <= Checks who is available on FreshChat.
+
+`/freshdesk-agents` <= Checks who is available on FreshDesk.
