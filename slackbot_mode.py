@@ -21,7 +21,8 @@ from modes import (
     spm_observer,
     kibana_temp_url,
     freshchat_agent_available,
-    freshdesk_agent_availability
+    freshdesk_agent_availability,
+    cancel_jobs
 )
 from invalid_url import check_url
 from slack_sdk import WebClient
@@ -1225,6 +1226,53 @@ def freshdesk_agents(data, text, user, response_url):
 
     post_results = freshdesk_agent_availability.post_results(user, headers, response_url, freshdesk_agents_result)
     print(post_results)
+
+    return Response(), 200
+
+
+@app.route("/zytebot-cancel-jobs", methods=["POST"])
+# the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
+def cancel_jobs_response():
+    data = request.form
+    text = data.get("text")
+    validators.url(text)
+    user = data.get("user_name")
+    response_url = data["response_url"]
+    message = {"text": "Connection successful!"}
+    resp = requests.post(response_url, json=message)
+    print(resp.status_code)
+    cancel_jobs_thread = threading.Thread(
+        target=cancel_jobs_bulk, args=(data, text, user, response_url)
+    )
+    cancel_jobs_thread.start()
+    return "Processing, Please wait!!"
+
+
+def cancel_jobs_bulk(data, text, user, response_url):
+    print(data)
+    print(user)
+    # print(text)
+    text_data = f'{text}'
+    text_data = text_data.split(', ')
+    print(text_data)
+    if len(text_data) == 3:
+        project_id = text_data[0]
+        spider_id = text_data[1]
+        api_key = text_data[2]
+        print(project_id)
+        print(spider_id)
+        print(api_key)
+        # Using a function check_agent_availability from freshdesk_agent_availability module of mode package
+        cancel_jobs_results = cancel_jobs.main_start(project_id, spider_id, api_key)
+        print(cancel_jobs_results)
+
+        post_results = cancel_jobs.post_results(user, headers, response_url, cancel_jobs_results, project_id, spider_id)
+        print(post_results)
+
+    else:
+        print('Enter the correct format')
+        incorrect_format = cancel_jobs.incorrect_format(response_url, headers, user)
+        print(incorrect_format)
 
     return Response(), 200
 
