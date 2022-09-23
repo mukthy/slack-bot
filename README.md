@@ -49,3 +49,5 @@ Usage is given below:
 `/freshchat-agents` <= Checks who is available on FreshChat.
 
 `/freshdesk-agents` <= Checks who is available on FreshDesk.
+
+`/zytebot-cancel-jobs <project_id>, <spider_id>, <org_api>` <= Cancel bulk Scrapy Cloud Jobs.
