@@ -69,6 +69,11 @@ def home():
     return render_template("home.html")
 
 
+@app.route("/agents", methods=["GET"])
+def agents():
+    return render_template("agents.txt")
+
+
 @app.route("/zytebot-antibot", methods=["POST"])
 def slack_response():
     data = request.form
