@@ -140,7 +140,7 @@ def slack_help():
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"@{user} Please use the command: /antibot http://example.com",
+                    "text": f"@{user} Please use the command: /zytebot-antibot http://example.com\n /zytebot-regioncheck http://example.com\n /zytebot-zytedataapi http://example.com\n /zytebot-netlock-dc http://example.com\n /zytebot-auto-x-product http://example.com\n /zytebot-auto-x-product-list http://example.com\n /zytebot-auto-x-article-list http://example.com\n /zytebot-auto-x-article http://example.com\n /dataset-project-log ORG_ID DATASET_ID\n /zytebot-fetchapiscreenshot\n /zytebot-netloc-config-orgid ORGID Netloc\n /zytebot-netloc-config Netloc\n /zytebot-uncork-config Netloc\n /zytebot-playwright google.com\n /zytebot-puppeteer google.com\n /zytebot-zytedataapi-screenshot https://example.com\n /zytebot-curlconvertor curl -U APIKEY: -x proxy.crawlera.com:8010 ‘https://www.amazon.in/Pure-Source-India-Reed-Sticks/dp/B079KCG68Y/'\n /zytebot-antibot-bulk https://www.usphonebook.com/, menards.com, https://allegro.pl/, https://google.com, petflow\n /zytebot-spm-observer 382142, cm-31-sep020, 10\n /zytebot-kibaba 382142, amazon.com\n /freshchat-agents\n /freshdesk-agents\n /zytebot-cancel-jobs <project_id>, <spider_id>, <org_api>\n Please check Pinned post in the channel for more details!",
                 },
             },
         ],
