@@ -1282,5 +1282,205 @@ def cancel_jobs_bulk(data, text, user, response_url):
     return Response(), 200
 
 
+@app.route("/chargebee-paypal-cancel-subs", methods=["POST"])
+# the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
+def chargebee_cancel_subs_response():
+    data = request.form
+    text = data.get("text")
+    validators.url(text)
+    user = data.get("user_name")
+    response_url = data["response_url"]
+    message = {"text": "Connection successful!"}
+    resp = requests.post(response_url, json=message)
+    print(resp.status_code)
+    chargebee_cancel_subs_thread = threading.Thread(
+        target=chargebee_cancel_subs, args=(data, text, user, response_url)
+    )
+    chargebee_cancel_subs_thread.start()
+    return "Processing, Please wait!!"
+
+
+def chargebee_cancel_subs(data, text, user, response_url):
+    print(data)
+    print(user)
+    print(text)
+
+    # write the email to email.txt
+
+    with open('/home/mukthy/slack/chargebee_abuse/email.txt', 'w') as f:
+        # f.write('\n')
+        f.write(text)
+        f.write('\n')
+        f.close()
+
+    with open('/home/mukthy/slack/chargebee_spam_monitoring/email.txt', 'a') as f:
+        # f.write('\n')
+        f.write(text)
+        f.write('\n')
+        f.close()
+
+    chargebee_main_results = chargebee_main.get_list_of_payment_sources(user, headers, slack_chargebee_webhook_url)
+    print(chargebee_main_results)
+
+    # chargebee_post_results = chargebee_cancel_post.cancel_message(user, headers, slack_webhook_url, chargebee_main_results)
+    # print(chargebee_post_results)
+    # chargebee_main_results.clear()
+
+    return Response(), 200
+
+
+@app.route("/chargebee-spam-list", methods=["POST"])
+# the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
+def chargebee_spam_list_response():
+    data = request.form
+    text = data.get("text")
+    validators.url(text)
+    user = data.get("user_name")
+    response_url = data["response_url"]
+    message = {"text": "Connection successful!"}
+    resp = requests.post(response_url, json=message)
+    print(resp.status_code)
+    chargebee_spam_list_thread = threading.Thread(
+        target=chargebee_spam_list, args=(data, text, user, response_url)
+    )
+    chargebee_spam_list_thread.start()
+    return "Processing, Please wait!!"
+
+
+def chargebee_spam_list(data, text, user, response_url):
+    print(data)
+    print(user)
+    print(text)
+
+    chargebee_spam_list_payload = {
+        "text": "Chargebee Cancel",
+        "blocks": [
+            {
+                "type": "section",
+                "block_id": "section567",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"@{user} Chargebee Spam Email/CC List: \n\n"
+                },
+            },
+        ],
+    }
+
+    response = requests.post(url=slack_chargebee_webhook_url, headers=headers,
+                             data=json.dumps(chargebee_spam_list_payload, indent=4))
+    print(response)
+    file_upload = client.files_upload(
+        channels=f"{chargebee_slack_channel}",
+        filetype="text",
+        file="/Users/mukthy/Desktop/office/slack_bots/slack-bot_dev/chargebee_spam_monitoring/email.txt",
+        title="ChargeBee Spam Email List",
+        user="@here",
+    )
+    print(file_upload.status_code)
+
+    file_upload2 = client.files_upload(
+        channels=f"{chargebee_slack_channel}",
+        filetype="text",
+        file="/Users/mukthy/Desktop/office/slack_bots/slack-bot_dev/chargebee_credit_card_spam_monitoring/cards.txt",
+        title="ChargeBee Spam Email List",
+        user="@here",
+    )
+    print(file_upload2.status_code)
+
+    return Response(), 200
+
+
+@app.route("/chargebee-cc-cancel-subs", methods=["POST"])
+# the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
+def chargebee_cc_cancel_subs_response():
+    data = request.form
+    text = data.get("text")
+    validators.url(text)
+    user = data.get("user_name")
+    response_url = data["response_url"]
+    message = {"text": "Connection successful!"}
+    resp = requests.post(response_url, json=message)
+    print(resp.status_code)
+    chargebee_cc_cancel_subs_thread = threading.Thread(
+        target=chargebee_cc_cancel_subs, args=(data, text, user, response_url)
+    )
+    chargebee_cc_cancel_subs_thread.start()
+    return "Processing, Please wait!!"
+
+
+def chargebee_cc_cancel_subs(data, text, user, response_url):
+    print(data)
+    print(user)
+    print(text)
+
+    check_text = text.split(',')
+    if len(check_text) == 5:
+        # write the email to email.txt
+        if len(check_text[0]) == 4 and len(check_text[1]) == 6 and len(check_text[2]) > 1 and len(check_text[3]) == 4:
+            print('valid')
+            with open('/Users/mukthy/Desktop/office/slack_bots/slack-bot_dev/chargebee_credit_card/cards.txt', 'w') as f:
+                # f.write('\n')
+                f.write(text)
+                f.write('\n')
+                f.close()
+
+            with open(
+                    '/Users/mukthy/Desktop/office/slack_bots/slack-bot_dev/chargebee_credit_card_spam_monitoring/cards.txt',
+                    'a') as f:
+                # f.write('\n')
+                f.write(text)
+                f.write('\n')
+                f.close()
+
+            chargebee_cc_main_results = chargebee_cancel_cc.get_list_of_payment_sources(user, headers,
+                                                                                        slack_chargebee_webhook_url)
+            print(chargebee_cc_main_results)
+
+            # chargebee_post_results = chargebee_cancel_post.cancel_message(user, headers, slack_webhook_url, chargebee_main_results)
+            # print(chargebee_post_results)
+            # chargebee_main_results.clear()
+
+        else:
+            print('invalid')
+            chargebee_cc_cancel_subs_payload = {
+                "text": "Chargebee Cancel",
+                "blocks": [
+                    {
+                        "type": "section",
+                        "block_id": "section567",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": f"@{user} Please enter the correct format of the last4, first6, expiry_month, exiry_year, brand. \n\n Example(Without Spaces b/w numbers): `/cb-cc-cancel-subs 6789,123456,12,2024,visa`"
+                        },
+                    },
+                ],
+            }
+
+            response = requests.post(url=response_url, headers=headers,
+                                     data=json.dumps(chargebee_cc_cancel_subs_payload, indent=4))
+            print(response)
+
+    else:
+        chargebee_cc_cancel_subs_payload = {
+            "text": "Chargebee Cancel",
+            "blocks": [
+                {
+                    "type": "section",
+                    "block_id": "section567",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"@{user} Please enter the correct format of the last4, first6, expiry_month, exiry_year, brand. \n\n Example(Without Spaces b/w numbers): `/cb-cc-cancel-subs 6789,123456,12,2024,visa`"
+                    },
+                },
+            ],
+        }
+
+        response = requests.post(url=response_url, headers=headers,
+                                 data=json.dumps(chargebee_cc_cancel_subs_payload, indent=4))
+        print(response)
+
+    return Response(), 200    
+
+
 if __name__ == "__main__":
     app.run(port=5050, debug=True)
