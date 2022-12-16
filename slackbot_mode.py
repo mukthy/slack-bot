@@ -1595,15 +1595,66 @@ def chargebee_add_cc_whitelist(data, text, user, response_url):
     return Response(), 200
 
 
-@app.route("/alert_logs", methods=["GET"])
-def alerts_logs():
-    return render_template("alert_logs.txt")
+@app.route("/chargebee-logs", methods=["POST"])
+# the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
+def chargebee_logs_response():
+    data = request.form
+    text = data.get("text")
+    validators.url(text)
+    user = data.get("user_name")
+    response_url = data["response_url"]
+    message = {"text": "Connection successful!"}
+    resp = requests.post(response_url, json=message)
+    print(resp.status_code)
+    chargebee_logs_thread = threading.Thread(
+        target=chargebee_logs, args=(data, text, user, response_url)
+    )
+    chargebee_logs_thread.start()
+    return "Processing, Please wait!!"
 
 
-@app.route("/activity_logs", methods=["GET"])
-def activity_logs():
-    return render_template("activity_logs.txt")
+def chargebee_logs(data, text, user, response_url):
+    print(data)
+    print(user)
+    print(text)
 
+    chargebee_logs_payload = {
+        "text": "Chargebee Cancel",
+        "blocks": [
+            {
+                "type": "section",
+                "block_id": "section567",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"@{user} Chargebee Alert and Activity Logs: \n\n"
+                },
+            },
+        ],
+    }
+
+    response = requests.post(url=slack_chargebee_webhook_url, headers=headers,
+                             data=json.dumps(chargebee_logs_payload, indent=4))
+    print(response)
+
+    alert_file_upload = chargebee_client.files_upload(
+        channels=f"{chargebee_slack_channel}",
+        filetype="text",
+        file="/home/mukthy/slack/templates/alert_logs.txt",
+        title="Alert Logs",
+        user="@here",
+    )
+    print(alert_file_upload.status_code)
+
+    activity_file_upload = chargebee_client.files_upload(
+        channels=f"{chargebee_slack_channel}",
+        filetype="text",
+        file="/home/mukthy/slack/templates/activity_logs.txt",
+        title="Activity Logs",
+        user="@here",
+    )
+    print(activity_file_upload.status_code)
+
+    return Response(), 200
 
 if __name__ == "__main__":
     app.run(port=5050, debug=True)
