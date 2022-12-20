@@ -1656,5 +1656,86 @@ def chargebee_logs(data, text, user, response_url):
 
     return Response(), 200
 
+
+@app.route("/chargebee-paypal-whitelist", methods=["POST"])
+# the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
+def chargebee_paypal_whitelist_response():
+    data = request.form
+    text = data.get("text")
+    validators.url(text)
+    user = data.get("user_name")
+    response_url = data["response_url"]
+    message = {"text": "Connection successful!"}
+    resp = requests.post(response_url, json=message)
+    print(resp.status_code)
+    chargebee_paypal_whitelist_thread = threading.Thread(
+        target=chargebee_paypal_whitelist, args=(data, text, user, response_url)
+    )
+    chargebee_paypal_whitelist_thread.start()
+    return "Processing, Please wait!!"
+
+
+def chargebee_paypal_whitelist(data, text, user, response_url):
+    print(data)
+    print(user)
+    print(text)
+
+    if text:
+        # write the email to email.txt
+        print('valid')
+        with open('/home/mukthy/slack/chargebee_abuse/paypal_whitelist.txt', 'a') as f:
+            # f.write('\n')
+            f.write(text)
+            f.write('\n')
+            f.close()
+
+        chargebee_spam_list_payload = {
+            "text": "Chargebee Cancel",
+            "blocks": [
+                {
+                    "type": "section",
+                    "block_id": "section567",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"@{user} Chargebee Paypal Whitelisted List: \n\n"
+                    },
+                },
+            ],
+        }
+
+        response = requests.post(url=slack_chargebee_webhook_url, headers=headers,
+                                 data=json.dumps(chargebee_spam_list_payload, indent=4))
+        print(response)
+        file_upload = chargebee_client.files_upload(
+            channels=f"{chargebee_slack_channel}",
+            filetype="text",
+            file="/home/mukthy/slack/chargebee_abuse/paypal_whitelist.txt",
+            title="ChargeBee CC Whitelisted List",
+            user="@here",
+        )
+        print(file_upload.status_code)
+
+    else:
+        chargebee_cc_cancel_subs_payload = {
+            "text": "Chargebee Cancel",
+            "blocks": [
+                {
+                    "type": "section",
+                    "block_id": "section567",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"@{user} Please enter the paypal email correctly abuser@example.com: `/chargebee-paypal-whitelist abuser@example.com`"
+                    },
+                },
+            ],
+        }
+
+        response = requests.post(url=response_url, headers=headers,
+                                 data=json.dumps(chargebee_cc_cancel_subs_payload, indent=4))
+        print(response)
+
+    return Response(), 200
+
+
 if __name__ == "__main__":
     app.run(port=5050, debug=True)
