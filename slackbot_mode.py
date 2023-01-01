@@ -10,7 +10,8 @@ from modes import (
     netloc_config,
     uncork_config,
     netloc_config_orgid,
-    start_command,
+    playwright_start,
+    playwright_start_residential
     zyte_api_screenshot,
     puppeteer_start,
     puppeteer_start_residential,
@@ -862,27 +863,69 @@ def slack_playwright_response():
 def playwright_func(data, text, user, response_url):
     print(data)
     print(user)
-    url = f"{text}"
+    print(text)
 
-    if validators.url(url) is True:
-        # Using a function initial_message from uncork_config module of mode package
+    text = text.split()
+    print(text)
 
-        initial_msg = start_command.initial_message(response_url, user)
-        print(initial_msg)
+    if len(text) > 1 and text[1] == "residential":
+        url = f'{text[0]}'
+        if validators.url(url) is True:
+            # Using a function initial_message from uncork_config module of mode package
 
-        # Using a function default_uncork_config from uncork_config module of mode package
-        playwright_resp = start_command.start(
-            url, user, slack_webhook_url, headers, response_url
-        )
-        print(playwright_resp)
+            initial_msg = playwright_start_residential.initial_message(response_url, user)
+            print(initial_msg)
 
-        return Response(), 200
+            # Using a function default_uncork_config from uncork_config module of mode package
+            playwright_resp = playwright_start_residential.start(
+                url, user, slack_webhook_url, headers, response_url)
+            print(playwright_resp)
+
+            return Response(), 200
+
+        else:
+
+            # the below is using puppeteer_playwright_resi_url_msg function from a custom module invalid_url.
+            incorrect_url_message = puppeteer_playwright_resi_url_msg(
+                user, response_url, headers)
+            print(incorrect_url_message)
+
+            return Response(), 200
+
+    elif len(text) == 1:
+
+        url = f'{text[0]}'
+
+        if validators.url(url) is True:
+            # Using a function initial_message from uncork_config module of mode package
+
+            initial_msg = playwright_start.initial_message(response_url, user)
+            print(initial_msg)
+
+            # Using a function default_uncork_config from uncork_config module of mode package
+            playwright_resp = playwright_start.start(
+                url, user, slack_webhook_url, headers, response_url)
+            print(playwright_resp)
+
+            return Response(), 200
+
+        else:
+
+            # the below is using puppeteer_playwright_resi_url_msg function from a custom module invalid_url.
+            incorrect_url_message = check_url(
+                user, response_url, headers)
+            print(incorrect_url_message)
+
+            return Response(), 200
 
     else:
 
-        # the below is using check_url function from a custom module invalid_url.
-        incorrect_url_message = check_url(user, response_url, headers)
+        # the below is using puppeteer_playwright_resi_url_msg function from a custom module invalid_url.
+        incorrect_url_message = puppeteer_playwright_resi_url_msg(
+            user, response_url, headers)
         print(incorrect_url_message)
+
+    return Response(), 200
 
 
 @app.route("/zytebot-puppeteer", methods=["POST"])
