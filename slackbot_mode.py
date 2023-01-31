@@ -1636,6 +1636,16 @@ def chargebee_add_cc_whitelist(data, text, user, response_url):
             )
             print(file_upload.status_code)
 
+            current_time = datetime.datetime.now()
+
+            data = f'{current_time}' + ' - ' + f'{user} Performed' + ' - ' + 'Action=WHITELIST' + ' - ' + f'CC Details={text}'
+            print(data)
+
+            with open('/home/mukthy/slack/templates/activity_logs.txt', 'a') as f:
+                f.write(data)
+                f.write('\n')
+                f.close()
+
         else:
             print('invalid')
             chargebee_cc_cancel_subs_payload = {
