@@ -1529,6 +1529,14 @@ def chargebee_cc_cancel_subs(data, text, user, response_url):
             chargebee_cc_main_results = chargebee_cancel_cc.get_list_of_payment_sources(user, headers,
                                                                                         slack_chargebee_webhook_url)
             print(chargebee_cc_main_results)
+            current_time = datetime.datetime.now()
+            data = f'{current_time}' + ' - ' + f'{user} Performed' + ' - ' + 'Action=CANCEL' + ' - ' + f'CC Details={text}'
+            print(data)
+
+            with open('/home/mukthy/slack/templates/activity_logs.txt', 'a') as f:
+                f.write(data)
+                f.write('\n')
+                f.close()
 
             # chargebee_post_results = chargebee_cancel_post.cancel_message(user, headers, slack_webhook_url, chargebee_main_results)
             # print(chargebee_post_results)
