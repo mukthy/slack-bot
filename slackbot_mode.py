@@ -1849,5 +1849,122 @@ def chargebee_paypal_whitelist(data, text, user, response_url):
     return Response(), 200
 
 
+@app.route("/freshdesk-agent-conversion", methods=["POST"])
+# the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
+def freshdesk_agent_conversion_response():
+    data = request.form
+    text = data.get("text")
+    validators.url(text)
+    user = data.get("user_name")
+    response_url = data["response_url"]
+    message = {"text": "Connection successful!"}
+    resp = requests.post(response_url, json=message)
+    print(resp.status_code)
+    freshdesk_agent_conversion_thread = threading.Thread(
+        target=freshdesk_agent_conversion, args=(data, text, user, response_url)
+    )
+    freshdesk_agent_conversion_thread.start()
+    return "Processing, Please wait!!"
+
+
+def freshdesk_agent_conversion(data, text, user, response_url):
+    print(data)
+    print(user)
+    print(text)
+
+    regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+
+    if re.fullmatch(regex, text):
+        print('Email is valid')
+        agent_id = freshdesk_contact2agent_conversion.get_agent_id(text)
+        print(agent_id)
+
+        if agent_id:
+            status = freshdesk_contact2agent_conversion.set_permission(agent_id)
+            print(status)
+
+            if status is 200:
+                print('Permission Set Successfully')
+                freshdesk_agent_conversion_payload = {
+                    "text": "Chargebee Cancel",
+                    "blocks": [
+                        {
+                            "type": "section",
+                            "block_id": "section567",
+                            "text": {
+                                "type": "mrkdwn",
+                                "text": f"@{user} Permission Set Successfully for the user: {text}"
+                            },
+                        },
+                    ],
+                }
+
+                response = requests.post(url=response_url, headers=headers,
+                                         data=json.dumps(freshdesk_agent_conversion_payload, indent=4))
+                print(response)
+
+            else:
+                print('Error in setting permission')
+                freshdesk_agent_conversion_payload = {
+                    "text": "Chargebee Cancel",
+                    "blocks": [
+                        {
+                            "type": "section",
+                            "block_id": "section567",
+                            "text": {
+                                "type": "mrkdwn",
+                                "text": f"@{user} Error Setting Permission, Please reachout to support."
+                            },
+                        },
+                    ],
+                }
+
+                response = requests.post(url=response_url, headers=headers,
+                                         data=json.dumps(freshdesk_agent_conversion_payload, indent=4))
+                print(response)
+
+        else:
+            print('Agent Not Found')
+            freshdesk_agent_conversion_payload = {
+                "text": "Chargebee Cancel",
+                "blocks": [
+                    {
+                        "type": "section",
+                        "block_id": "section567",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": f"@{user} Either Agent not signed up to app.zyte.com or Agent already has permission.\n If none of the above, Please reachout to support."
+                        },
+                    },
+                ],
+            }
+
+            response = requests.post(url=response_url, headers=headers,
+                                     data=json.dumps(freshdesk_agent_conversion_payload, indent=4))
+            print(response)
+
+    else:
+        print('Email is invalid')
+        freshdesk_agent_conversion_payload = {
+            "text": "Chargebee Cancel",
+            "blocks": [
+                {
+                    "type": "section",
+                    "block_id": "section567",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"@{user} Please enter a valid email address or you have entered a Non-Zyte Email."
+                    },
+                },
+            ],
+        }
+
+        response = requests.post(url=response_url, headers=headers,
+                                 data=json.dumps(freshdesk_agent_conversion_payload, indent=4))
+        print(response)
+
+    return Response(), 200
+
+
 if __name__ == "__main__":
     app.run(port=5050, debug=True)
