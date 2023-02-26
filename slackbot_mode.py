@@ -323,24 +323,76 @@ def slack_zyteapi_response():
 def zytedataapi(data, text, user, response_url):
     print(data)
     print(user)
-    url = f"{text}"
 
-    if validators.url(text) is True:
+    text = text.split(" ")
+    print(text)
 
-        # Using a function initial_message from zyte_api module of mode package
+    if len(text) == 1:
+        print("Only 1 URL is provided")
+        text = text[0]
+        url = f'{text}'
+        if validators.url(text) is True:
 
-        initial_msg = zyte_api.initial_message(response_url, user)
-        print(initial_msg)
+            # Using a function initial_message from zyte_api module of mode package
 
-        # Using a function zyte_api_req from zyte_api module of mode package
-        zyte_resp = zyte_api.zyte_api_req(url, user, slack_webhook_url, headers)
-        print(zyte_resp)
+            initial_msg = zyte_api.initial_message(response_url, user)
+            print(initial_msg)
 
-    else:
+            # Using a function zyte_api_req from zyte_api module of mode package
+            zyte_resp = zyte_api.zyte_api_req(
+                url, user, slack_webhook_url, headers)
+            print(zyte_resp)
 
-        # Using a function check_url from invalid_url module
-        incorrect_url_warning = check_url(user, response_url, headers)
-        print(incorrect_url_warning.status_code)
+        else:
+
+            # Using a function check_url from zyte_api module of mode package
+            incorrect_url_warning = check_url(user, response_url, headers)
+            print(incorrect_url_warning.status_code)
+
+        return Response(), 200
+
+    elif len(text) > 1:
+
+        if "cookies_from" in text:
+
+            print("More than 1 URL is provided")
+            url = text[0]
+            cookie_url = text[2]
+            if validators.url(url) is True and validators.url(cookie_url) is True:
+
+                options = "httpResponse"
+                # Using a function initial_message from zyte_api module of mode package
+                initial_msg = zyte_api.initial_message(response_url, user)
+                print(initial_msg)
+
+                response = zyte_api_cookies.main(url, cookie_url, options, user, slack_webhook_url, headers)
+                print(response)
+
+            else:
+
+                # Using a function check_url from zyte_api module of mode package
+                incorrect_url_warning = check_url(user, response_url, headers)
+                print(incorrect_url_warning.status_code)
+
+        else:
+            print("Multiple URL's are provided but no cookies_from")
+            no_cookies_from_command = {
+                "blocks": [
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": f"@{user} You have entered multiple URL's but did not include `cookies_from` \n For Eg: /zytedapi https://example.com/need_cookies cookies_from https://example.com/cookies\n",
+                        },
+                    }
+                ]
+            }
+            incorrect_org_response = requests.post(
+                url=response_url,
+                headers=headers,
+                data=json.dumps(no_cookies_from_command),
+            )
+            print(incorrect_org_response.status_code)
 
     return Response(), 200
 
