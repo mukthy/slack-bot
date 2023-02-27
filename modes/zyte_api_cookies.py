@@ -184,42 +184,51 @@ def send_errors_to_slack(zyte_api_error_result, user, slack_webhook_url, headers
 
 
 def main(url, cookie_url, option, user, slack_webhook_url, headers):
+    
     # url = "https://www.youtube.com/"
     # option = 'httpResponse'
 
     if option == 'httpResponse':
-        browser_cookies_response = browser_html_response_cookies(url)
+        if cookie_url == '':
+            print("URL is None, so taking default URL: ", url)
+            cookie_url = url
+            browser_cookies_response = browser_html_response_cookies(cookie_url)
+        else:
+            print("URL is Given: ", cookie_url)
+            browser_cookies_response = browser_html_response_cookies(cookie_url)
+
         if browser_cookies_response.status_code == 200:
             cookies = browser_cookies_response.json()["experimental"]["responseCookies"]
             print(cookies)
-            if cookie_url == '':
-                cookie_url = url
-                print("URL is None, so taking default URL: ", cookie_url)
-                response = http_request_cookies(cookie_url, cookies)
-                print(response)
-                return response
+            # if cookie_url == '':
+            #     cookie_url = url
+            #     print("URL is None, so taking default URL: ", cookie_url)
+            #     response = http_request_cookies(url, cookies)
+            #     print(response)
+            #     return response
+            #
+            # else:
+            # print("URL is Given: ", cookie_url)
+            print("Sending Request to HTTP REQUEST COOKIES FUNCTION")
+            response = http_request_cookies(url, cookies)
+            if response.status_code == 200:
+                response = response.text
+                print(type(response))
+                with open('response.json', 'w') as f:
+                    json.dump(response, f)
+                response = json.loads(response)
+                response = response["httpResponseBody"]
+                response = base64.b64decode(response)
+                response = response.decode("utf-8")
+                slack_response = send_to_slack(response, user, slack_webhook_url, headers, url)
+                print(slack_response)
+                return slack_response
 
             else:
-                print("URL is Given: ", cookie_url)
-                response = http_request_cookies(cookie_url, cookies)
-                if response.status_code == 200:
-                    response = response.text
-                    print(type(response))
-                    with open('response.json', 'w') as f:
-                        json.dump(response, f)
-                    response = json.loads(response)
-                    response = response["httpResponseBody"]
-                    response = base64.b64decode(response)
-                    response = response.decode("utf-8")
-                    slack_response = send_to_slack(response, user, slack_webhook_url, headers, url)
-                    print(slack_response)
-                    return slack_response
-
-                else:
-                    print("Got cookies but error in getting response from Zyte API using HttpResponseBody")
-                    slack_error_response = send_errors_to_slack(response.text, user, slack_webhook_url, headers, url)
-                    print(slack_error_response)
-                    return slack_error_response
+                print("Got cookies but error in getting response from Zyte API using HttpResponseBody")
+                slack_error_response = send_errors_to_slack(response.text, user, slack_webhook_url, headers, url)
+                print(slack_error_response)
+                return slack_error_response
 
         else:
             print("Error in getting cookies from Zyte API")
