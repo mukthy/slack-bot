@@ -14,6 +14,8 @@ Usage is given below:
 
 `/zytebot-zytedataapi https://example.com` <= ZyteDataAPI
 
+`/zytebot-zytedataapi https://example.com/need-cookies cookies_from https://example.com/cookies` <= ZyteDataAPI Experimental Cookies.
+
 `/zytebot-netlock-dc https://example.com` <= Netlocsmith with Slack
 
 `/zytebot-auto-x-product https://example.com` <= product-extraction
