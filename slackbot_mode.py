@@ -1748,6 +1748,120 @@ def chargebee_add_cc_whitelist(data, text, user, response_url):
     return Response(), 200
 
 
+@app.route("/chargebee-add-cc-whitelist-zyteapi", methods=["POST"])
+# the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
+def chargebee_add_cc_whitelist_zyteapi_response():
+    data = request.form
+    text = data.get("text")
+    validators.url(text)
+    user = data.get("user_name")
+    response_url = data["response_url"]
+    message = {"text": "Connection successful!"}
+    resp = requests.post(response_url, json=message)
+    print(resp.status_code)
+    chargebee_add_cc_whitelist_zyteapi_thread = threading.Thread(
+        target=chargebee_add_cc_whitelist_zyteapi, args=(data, text, user, response_url)
+    )
+    chargebee_add_cc_whitelist_zyteapi_thread.start()
+    return "Processing, Please wait!!"
+
+
+def chargebee_add_cc_whitelist_zyteapi(data, text, user, response_url):
+    print(data)
+    print(user)
+    print(text)
+
+    check_text = text.split(',')
+    if len(check_text) == 5:
+        # write the email to email.txt
+        if len(check_text[0]) == 4 and len(check_text[1]) == 6 and len(check_text[2]) >= 1 and len(check_text[3]) == 4:
+            print('valid')
+            with open(
+                    '/Users/mukthy/Desktop/office/slack_bots/slack-bot_dev/chargebee_credit_card/whitelisted_orgs.txt',
+                    'a') as f:
+                # f.write('\n')
+                f.write(text)
+                f.write('\n')
+                f.close()
+
+            chargebee_spam_list_payload = {
+                "text": "Chargebee Cancel",
+                "blocks": [
+                    {
+                        "type": "section",
+                        "block_id": "section567",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": f"@{user} Chargebee CC Whitelisted List: \n\n"
+                        },
+                    },
+                ],
+            }
+
+            response = requests.post(url=slack_chargebee_webhook_url, headers=headers,
+                                     data=json.dumps(chargebee_spam_list_payload, indent=4))
+            print(response)
+            file_upload = client.files_upload(
+                channels=f"{chargebee_slack_channel}",
+                filetype="text",
+                file="/Users/mukthy/Desktop/office/slack_bots/slack-bot_dev/chargebee_credit_card/whitelisted_orgs.txt",
+                title="ChargeBee CC Whitelisted List",
+                user="@here",
+            )
+            print(file_upload.status_code)
+
+            current_time = datetime.datetime.now()
+
+            data = f'{current_time}' + ' - ' + f'{user} Performed' + ' - ' + 'Action=WHITELIST' + ' - ' + f'CC Details={text}'
+            print(data)
+
+            with open('/home/mukthy/slack/templates/activity_logs.txt', 'a') as f:
+                f.write(data)
+                f.write('\n')
+                f.close()
+
+        else:
+            print('invalid')
+            chargebee_cc_cancel_subs_payload = {
+                "text": "Chargebee Cancel",
+                "blocks": [
+                    {
+                        "type": "section",
+                        "block_id": "section567",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": f"@{user} Please enter the correct format of the last4, first6, expiry_month, exiry_year, brand. \n\n Example(Without Spaces b/w numbers): `/chargebee-add-cc-whitelist 6789,123456,12,2024,visa`"
+                        },
+                    },
+                ],
+            }
+
+            response = requests.post(url=response_url, headers=headers,
+                                     data=json.dumps(chargebee_cc_cancel_subs_payload, indent=4))
+            print(response)
+
+    else:
+        chargebee_cc_cancel_subs_payload = {
+            "text": "Chargebee Cancel",
+            "blocks": [
+                {
+                    "type": "section",
+                    "block_id": "section567",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"@{user} Please enter the correct format of the last4, first6, expiry_month, exiry_year, brand. \n\n Example(Without Spaces b/w numbers): `/chargebee-add-cc-whitelist 6789,123456,12,2024,visa`"
+                    },
+                },
+            ],
+        }
+
+        response = requests.post(url=response_url, headers=headers,
+                                 data=json.dumps(chargebee_cc_cancel_subs_payload, indent=4))
+        print(response)
+
+    return Response(), 200
+
+
 @app.route("/chargebee-logs", methods=["POST"])
 # the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
 def chargebee_logs_response():
