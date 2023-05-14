@@ -1633,7 +1633,110 @@ def chargebee_cc_cancel_subs(data, text, user, response_url):
                                  data=json.dumps(chargebee_cc_cancel_subs_payload, indent=4))
         print(response)
 
-    return Response(), 200    
+    return Response(), 200
+
+
+@app.route("/cb-cc-cancel-zyteapi-subs", methods=["POST"])
+# the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
+def chargebee_cc_zyteapi_cancel_subs_response():
+    data = request.form
+    text = data.get("text")
+    validators.url(text)
+    user = data.get("user_name")
+    response_url = data["response_url"]
+    message = {"text": "Connection successful!"}
+    resp = requests.post(response_url, json=message)
+    print(resp.status_code)
+    chargebee_cc_zyteapi_cancel_subs_thread = threading.Thread(
+        target=chargebee_cc_zyteapi_cancel_subs, args=(data, text, user, response_url)
+    )
+    chargebee_cc_zyteapi_cancel_subs_thread.start()
+    return "Processing, Please wait!!"
+
+
+def chargebee_cc_zyteapi_cancel_subs(data, text, user, response_url):
+    print(data)
+    print(user)
+    print(text)
+
+    check_text = text.split(',')
+    print(check_text)
+    if len(check_text) == 5:
+        # write the email to email.txt
+        if len(check_text[0]) == 4 and len(check_text[1]) == 6 and len(check_text[2]) >= 1 and len(check_text[3]) == 4:
+            print('valid')
+            with open('/Users/mukthy/Desktop/office/slack_bots/slack-bot_dev/chargebee_credit_card/cards.txt',
+                      'w') as f:
+                # f.write('\n')
+                f.write(text)
+                f.write('\n')
+                f.close()
+
+            with open(
+                    '/Users/mukthy/Desktop/office/slack_bots/slack-bot_dev/chargebee_credit_card_spam_monitoring/cards.txt',
+                    'a') as f:
+                # f.write('\n')
+                f.write(text)
+                f.write('\n')
+                f.close()
+
+            chargebee_cc_main_results = chargebee_cancel_cc_zyteapi.get_list_of_payment_sources(user, headers,
+                                                                                                slack_chargebee_webhook_url)
+            print(chargebee_cc_main_results)
+            current_time = datetime.datetime.now()
+            data = f'{current_time}' + ' - ' + f'{user} Performed' + ' - ' + 'Action=CANCEL' + ' - ' + f'CC Details={text}'
+            print(data)
+
+            with open('/Users/mukthy/Desktop/office/slack_bots/slack-bot_dev/templates/activity_logs.txt', 'a') as f:
+                f.write(data)
+                f.write('\n')
+                f.close()
+
+            # chargebee_post_results = chargebee_cancel_post.cancel_message(user, headers, slack_webhook_url, chargebee_main_results)
+            # print(chargebee_post_results)
+            # chargebee_main_results.clear()
+
+        else:
+            print('invalid')
+            chargebee_cc_cancel_subs_payload = {
+                "text": "Chargebee Cancel",
+                "blocks": [
+                    {
+                        "type": "section",
+                        "block_id": "section567",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": f"@{user} Please enter the correct format of the last4, first6, expiry_month, exiry_year, brand. \n\n Example(Without Spaces b/w numbers): `/cb-cc-cancel-zyteapi-subs 6789,123456,12,2024,visa`"
+                        },
+                    },
+                ],
+            }
+
+            response = requests.post(url=response_url, headers=headers,
+                                     data=json.dumps(chargebee_cc_cancel_subs_payload, indent=4))
+            print(response)
+
+    else:
+        chargebee_cc_cancel_subs_payload = {
+            "text": "Chargebee Cancel",
+            "blocks": [
+                {
+                    "type": "section",
+                    "block_id": "section567",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"@{user} Please enter the correct format of the last4, first6, expiry_month, exiry_year, brand. \n\n Example(Without Spaces b/w numbers): `/cb-cc-cancel-zyteapi-subs 6789,123456,12,2024,visa`"
+                    },
+                },
+            ],
+        }
+
+        response = requests.post(url=response_url, headers=headers,
+                                 data=json.dumps(chargebee_cc_cancel_subs_payload, indent=4))
+        print(response)
+
+    return Response(), 200
+    
 
 
 @app.route("/chargebee-add-cc-whitelist", methods=["POST"])
