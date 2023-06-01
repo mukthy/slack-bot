@@ -2235,5 +2235,50 @@ def freshdesk_agent_conversion(data, text, user, response_url):
     return Response(), 200
 
 
+@app.route("/zytebot-browserfingerprint", methods=["POST"])
+# the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
+def browser_fingerprint_response():
+    data = request.form
+    text = data.get("text")
+    validators.url(text)
+    user = data.get("user_name")
+    response_url = data["response_url"]
+    message = {"text": "Connection successful!"}
+    resp = requests.post(response_url, json=message)
+    print(resp.status_code)
+    browser_fingerprint_thread = threading.Thread(
+        target=browser_fingerprint, args=(data, text, user, response_url)
+    )
+    browser_fingerprint_thread.start()
+    return "Processing, Please wait!!"
+
+
+def browser_fingerprint(data, text, user, response_url):
+    print(data)
+    print(user)
+    print(text)
+
+    url = f"{text}"
+    if validators.url(url) is True:
+        initial_message = antibot.initial_message(
+            user, slack_webhook_url, headers, response_url, url)
+        print(initial_message.status_code)
+        url = url.split("/")
+        url = url[0] + '//' + url[2]
+        print(url)
+        bf = runner.run(url, response_url, headers, user)
+        print("Data Sent to Slack")
+    else:
+
+        # the below is using check_url function from a custom module invalid_url.
+        incorrect_url_message = check_url(
+            user, response_url, headers)
+        print(incorrect_url_message)
+
+    return Response(), 200
+
+
+
+
 if __name__ == "__main__":
     app.run(port=5050, debug=True)
