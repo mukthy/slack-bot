@@ -1082,28 +1082,59 @@ def slack_zytedataapi_response():
 def zytedataapi_screenshot(data, text, user, response_url):
     print(data)
     print(user)
-    url = f"{text}"
 
-    if validators.url(text) is True:
+    inputs = text.split()
 
-        # Using a function initial_message from zyte_api module of mode package
+    if "firefox" == inputs[0].lower() and len(inputs) > 1:
+        print("Firefox")
 
-        initial_msg = fetch_api_screenshot.initial_message(response_url, user)
-        print(initial_msg)
+        url = f'{inputs[1]}'
 
-        # Using a function zyte_api_req from zyte_api module of mode package
-        zytedataapi_screenshot_resp = zyte_api_screenshot.zyte_api_screenshot(
-            url, user, slack_webhook_url, headers
-        )
-        print(zytedataapi_screenshot_resp)
+        if validators.url(url) is True:
+
+            # Using a function initial_message from zyte_api module of mode package
+
+            initial_msg = fetch_api_screenshot.initial_message(response_url, user)
+            print(initial_msg)
+
+            # Using a function zyte_api_req from zyte_api module of mode package
+            zytedataapi_screenshot_resp = zyte_api_screenshot_ff.zyte_api_screenshot(
+                url, user, slack_webhook_url, headers)
+            print(zytedataapi_screenshot_resp)
+
+        else:
+
+            # Using a function check_url from zyte_api module of mode package
+            incorrect_url_warning = check_url(user, response_url, headers)
+            print(incorrect_url_warning.status_code)
+
+        return Response(), 200
 
     else:
+        print("Chrome")
 
-        # Using a function check_url from zyte_api module of mode package
-        incorrect_url_warning = check_url(user, response_url, headers)
-        print(incorrect_url_warning.status_code)
+        url = f'{inputs[0]}'
 
-    return Response(), 200
+        if validators.url(url) is True:
+
+            # Using a function initial_message from zyte_api module of mode package
+
+            initial_msg = fetch_api_screenshot.initial_message(response_url, user)
+            print(initial_msg)
+
+            # Using a function zyte_api_req from zyte_api module of mode package
+            zytedataapi_screenshot_resp = zyte_api_screenshot.zyte_api_screenshot(
+                url, user, slack_webhook_url, headers)
+            print(zytedataapi_screenshot_resp)
+
+        else:
+
+            # Using a function check_url from zyte_api module of mode package
+            incorrect_url_warning = check_url(user, response_url, headers)
+            print(incorrect_url_warning.status_code)
+
+        return Response(), 200
+
 
 
 @app.route("/zytebot-curlconvertor", methods=["POST"])
