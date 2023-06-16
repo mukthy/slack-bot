@@ -1154,6 +1154,63 @@ def slack_zytedataapi_residential_response():
     return "Processing, Please wait!!"
 
 
+def zytedataapi_residential(data, text, user, response_url):
+    print(data)
+    print(user)
+
+    inputs = text.split()
+
+    if "firefox" == inputs[0].lower() and len(inputs) > 1:
+        print("Firefox")
+        url = f'{inputs[1]}'
+
+        if validators.url(url) is True:
+
+            # Using a function initial_message from zyte_api module of mode package
+
+            initial_msg = fetch_api_screenshot.initial_message(response_url, user)
+            print(initial_msg)
+
+            # Using a function zyte_api_req from zyte_api module of mode package
+            zytedataapi_screenshot_resp = zyte_api_screenshot_firefox_residential.zyte_api_screenshot(
+                url, user, slack_webhook_url, headers)
+            print(zytedataapi_screenshot_resp)
+
+        else:
+
+            # Using a function check_url from zyte_api module of mode package
+            incorrect_url_warning = check_url(user, response_url, headers)
+            print(incorrect_url_warning.status_code)
+
+        return Response(), 200
+
+    else:
+        print("Chrome")
+
+        url = f'{inputs[0]}'
+
+        if validators.url(url) is True:
+
+            # Using a function initial_message from zyte_api module of mode package
+
+            initial_msg = fetch_api_screenshot.initial_message(response_url, user)
+            print(initial_msg)
+
+            # Using a function zyte_api_req from zyte_api module of mode package
+            zytedataapi_screenshot_resp = zyte_api_screenshot_residential.zyte_api_screenshot(
+                url, user, slack_webhook_url, headers)
+            print(zytedataapi_screenshot_resp)
+
+        else:
+
+            # Using a function check_url from zyte_api module of mode package
+            incorrect_url_warning = check_url(user, response_url, headers)
+            print(incorrect_url_warning.status_code)
+
+        return Response(), 200
+
+
+
 @app.route("/zytebot-curlconvertor", methods=["POST"])
 # the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
 def curlconvertor_response():
