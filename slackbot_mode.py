@@ -1210,6 +1210,23 @@ def zytedataapi_residential(data, text, user, response_url):
         return Response(), 200
 
 
+@app.route("/zytebot-zyteapi-isp", methods=["POST"])
+# the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
+def slack_zytedataapi_isp_response():
+    data = request.form
+    text = data.get("text")
+    validators.url(text)
+    user = data.get("user_name")
+    response_url = data["response_url"]
+    message = {"text": "Connection successful!"}
+    resp = requests.post(response_url, json=message)
+    print(resp.status_code)
+    zytedataapi_isp_thread = threading.Thread(
+        target=zytedataapi_isp, args=(data, text, user, response_url)
+    )
+    zytedataapi_isp_thread.start()
+    return "Processing, Please wait!!"
+
 
 @app.route("/zytebot-curlconvertor", methods=["POST"])
 # the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
