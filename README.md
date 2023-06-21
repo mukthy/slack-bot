@@ -53,3 +53,6 @@ Usage is given below:
 `/freshdesk-agents` <= Checks who is available on FreshDesk.
 
 `/zytebot-cancel-jobs <project_id>, <spider_id>, <org_api>` <= Cancel bulk Scrapy Cloud Jobs.
+
+`/zytebot-zyteapi-isp  https://google.com` <= Checks with ISP proxy type with CHROME.
+
