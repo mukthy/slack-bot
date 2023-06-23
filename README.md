@@ -56,3 +56,4 @@ Usage is given below:
 
 `/zytebot-zyteapi-isp  https://google.com` <= Checks with ISP proxy type with CHROME.
 
+`/zytebot-zyteapi-isp firefox https://google.com` <= Checks with ISP proxy type with FireFox.
