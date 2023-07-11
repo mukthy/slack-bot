@@ -11,20 +11,26 @@ from modes import (
     uncork_config,
     netloc_config_orgid,
     playwright_start,
-    playwright_start_residential
-    zyte_api_screenshot,
-    puppeteer_start,
     puppeteer_start_residential,
-    antibot_bulk,
+    puppeteer_start,
+    playwright_start_residential,
+    zyte_api_screenshot,
     curlconverter,
-    spm_observer,
+    antibot_bulk,
     initial_msg,
     kibana,
     spm_observer,
     kibana_temp_url,
     freshchat_agent_available,
     freshdesk_agent_availability,
-    cancel_jobs
+    cancel_jobs,
+    zyte_api_cookies,
+    zyte_api_screenshot_residential,
+    zyte_api_screenshot_firefox_residential,
+    zyte_api_screenshot_firefox_isp,
+    zyte_api_screenshot_isp,
+    zyte_api_screenshot_ff,
+    zyte_api_extraction
 )
 from invalid_url import check_url
 from slack_sdk import WebClient
@@ -2455,6 +2461,22 @@ def browser_fingerprint(data, text, user, response_url):
     return Response(), 200
 
 
+@app.route("/zytebot-zapi-extraction", methods=["POST"])
+# the below function is to send a response as 200 to slack's post request within 3 sec to avoid the "operation_timed_out" error.
+def zapi_extraction_response():
+    data = request.form
+    text = data.get("text")
+    validators.url(text)
+    user = data.get("user_name")
+    response_url = data["response_url"]
+    message = {"text": "Connection successful!"}
+    resp = requests.post(response_url, json=message)
+    print(resp.status_code)
+    zapi_extraction_thread = threading.Thread(
+        target=zapi_extraction, args=(data, text, user, response_url)
+    )
+    zapi_extraction_thread.start()
+    return "Processing, Please wait!!"
 
 
 if __name__ == "__main__":
