@@ -2479,5 +2479,63 @@ def zapi_extraction_response():
     return "Processing, Please wait!!"
 
 
+def zapi_extraction(data, text, user, response_url):
+    print(data)
+    print(user)
+    print(text)
+
+    text = text.split(" ")
+
+    if len(text) > 1:
+
+        page_type = text[0]
+        url = text[1]
+
+        if validators.url(url) is True and (page_type in ['product', 'productList', 'article', 'articleList']):
+
+            zapi_extraction_result = zyte_api_extraction.zapi_extraction(url, user, slack_webhook_url, headers, page_type)
+
+            print(zapi_extraction_result)
+
+        else:
+            zapi_extraction_payload = {
+                "text": "ZyteAPI Extraction",
+                "blocks": [
+                    {
+                        "type": "section",
+                        "block_id": "section567",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": f"@{user} Please enter the command is the following format, ex: `/zytebot-zapi-extraction product https://example.com/` \n\n `/zytebot-zapi-extraction productList https://example.com/` \n\n `/zytebot-zapi-extraction article https://example.com/` \n\n `/zytebot-zapi-extraction articleList https://example.com/`"
+                        },
+                    },
+                ],
+            }
+
+            response = requests.post(url=response_url, headers=headers,
+                                     data=json.dumps(zapi_extraction_payload, indent=4))
+            print(response)
+
+    else:
+        zapi_extraction_payload = {
+            "text": "ZyteAPI Extraction",
+            "blocks": [
+                {
+                    "type": "section",
+                    "block_id": "section567",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"@{user} Please enter the command is the following format, ex: `/zytebot-zapi-extraction product https://example.com/` \n\n `/zytebot-zapi-extraction productList https://example.com/` \n\n `/zytebot-zapi-extraction article https://example.com/` \n\n `/zytebot-zapi-extraction articleList https://example.com/`"
+                    },
+                },
+            ],
+        }
+
+        response = requests.post(url=response_url, headers=headers,
+                                 data=json.dumps(zapi_extraction_payload, indent=4))
+        print(response)
+
+    return Response(), 200
+
 if __name__ == "__main__":
     app.run(port=5050, debug=True)
